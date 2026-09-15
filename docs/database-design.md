@@ -40,8 +40,8 @@ povezuje te dvije strane.
 
 ## 3. Predložene tablice i polja
 
-Polja su u nastavku opisana običnim riječima. Točni SQL tipovi i ograničenja za tablicu workouts definirani su u SQL
-datoteci početne sheme. Detalje preostalih tablica razradit ćemo prije njihove izrade.
+U nastavku je opisan model tablica i značenje njihovih polja. Točna SQL provedba nalazi se u datoteci `schema.sql`, a
+stanje izrađenih tablica i rezultati provjera navedeni su u poglavlju 7.
 
 ### `workouts` — treninzi
 
@@ -218,29 +218,49 @@ Ovaj model ne sprema povijest promjena naziva.
 - **Preimenovanje vježbe:** promjena naziva kataloške vježbe prikazuje se i u ranijim treninzima. Povijest promjena
   naziva ne spremamo.
 
-Za preostale tablice još treba odrediti točne SQL tipove, najveće duljine tekstova, dopušteni raspon težine i
-ograničenja baze.
+Za tablicu `sets` još treba odrediti točne SQL tipove, dopuštene raspone brojeva i težine te ograničenja baze.
 
 ## 7. Trenutačno stanje i sljedeći korak
 
-Izrađena je baza `gymlog` na MySQL poslužitelju 8.4.11. Koristi skup znakova `utf8mb4` i kolaciju `utf8mb4_0900_as_ci`.
+U bazi `gymlog` na MySQL poslužitelju 8.4.11 izrađene su tablice `workouts`, `exercises` i `workout_exercises`.
 
-Izrađena je tablica `workouts` s mehanizmom pohrane InnoDB:
+Sve tri koriste InnoDB, skup znakova `utf8mb4` i kolaciju `utf8mb4_0900_as_ci`. Svaka ima primarni ključ `id` tipa `INT UNSIGNED` s automatskim dodjeljivanjem vrijednosti.
 
-| Stupac         | Tip i ograničenja                                                     |
-|----------------|-----------------------------------------------------------------------|
-| `id`           | `INT UNSIGNED`, automatsko dodjeljivanje vrijednosti i primarni ključ |
-| `workout_date` | `DATE`, obvezna vrijednost                                            |
-| `name`         | `VARCHAR(100)`, obvezna vrijednost                                    |
-| `note`         | `TEXT`, dopušten `NULL`                                               |
+### Stupci izrađenih tablica
 
-Ograničenje `chk_workouts_name_not_blank` odbija prazan naziv i naziv sastavljen samo od običnih razmaka. `NOT NULL`
-zasebno odbija nedostajuću vrijednost naziva.
+| Tablica | Stupac | Tip i obveznost |
+| --- | --- | --- |
+| `workouts` | `workout_date` | `DATE NOT NULL` |
+| `workouts` | `name` | `VARCHAR(100) NOT NULL` |
+| `workouts` | `note` | `TEXT`, dopušten `NULL` |
+| `exercises` | `name` | `VARCHAR(100) NOT NULL` |
+| `workout_exercises` | `workout_id` | `INT UNSIGNED NOT NULL` |
+| `workout_exercises` | `exercise_id` | `INT UNSIGNED NOT NULL` |
+| `workout_exercises` | `position` | `INT UNSIGNED NOT NULL` |
 
-Ručnim provjerama potvrđeni su unos i čitanje probnih treninga te odbijanje naziva koji je `NULL`, prazan ili sastavljen
-samo od razmaka. Probni podatci nisu dio početne SQL sheme.
+### Provedena ograničenja
 
-Tablice `exercises`, `workout_exercises` i `sets` još nisu izrađene. Povezivanje aplikacije preko PDO-a i PHP
-validacija, uključujući zabranu budućeg datuma treninga, slijede kasnije.
+- Nazivi treninga i vježbi ne smiju biti `NULL`, prazni ili sastavljeni samo od običnih razmaka.
+- Naziv kataloške vježbe mora biti jedinstven bez razlikovanja velikih i malih slova.
+- Pozicija vježbe u treningu mora biti veća od nule.
+- Par `workout_id` i `exercise_id` mora biti jedinstven.
+- Par `workout_id` i `position` mora biti jedinstven.
+- Strani ključevi zahtijevaju postojanje povezanog treninga i kataloške vježbe.
+- Brisanje treninga preko `ON DELETE CASCADE` uklanja njegove zapise u `workout_exercises`.
+- `ON DELETE RESTRICT` sprječava brisanje kataloške vježbe koja se koristi u treningu.
 
-Sljedeći korak je commit ove cjeline, a zatim izrada preostalih tablica i njihovih veza.
+### Ručne provjere
+
+Potvrđeni su unos i čitanje valjanih podataka te korištenje iste kataloške vježbe u različitim treninzima.
+
+Provjereno je odbijanje nevaljanih naziva, duplikata naziva koji se razlikuju samo po veličini slova, ponovljene vježbe u istom treningu, zauzete pozicije, pozicije nula i nepostojećih povezanih ID-eva.
+
+Na zasebnim probnim zapisima potvrđeno je da brisanje korištene kataloške vježbe bude odbijeno, dok brisanje treninga uklanja njegovu vezu i čuva katalošku vježbu. Nekorištenu katalošku vježbu moguće je obrisati.
+
+Probni podatci nisu dio početne SQL sheme.
+
+### Sljedeća cjelina
+
+Slijedi tablica `sets`, koja će spremati pojedinačne serije vježbe u konkretnom treningu: redni broj serije, ponavljanja i težinu.
+
+Povezivanje aplikacije preko PDO-a i PHP validacija, uključujući zabranu budućeg datuma treninga, još nisu izrađeni.
