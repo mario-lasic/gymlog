@@ -271,9 +271,34 @@ uklanja njegovu vezu i čuva katalošku vježbu. Nekorištenu katalošku vježbu
 
 Tablica `sets` uspješno je stvorena. Nevaljani unosi korišteni u ručnoj provjeri bili su odbijeni.
 
+### Povezivanje aplikacije s bazom
+
+Izrađen je zaseban MySQL račun `gymlog_app` s pravima `SELECT`, `INSERT`, `UPDATE` i `DELETE` nad bazom `gymlog`.
+Aplikacija za povezivanje ne koristi administratorski račun.
+
+Konfiguracijski predložak nalazi se u `config/database.example.php`. Stvarni pristupni podatci nalaze se u lokalnoj
+datoteci `config/database.local.php`, koja je izuzeta iz Gita.
+
+Datoteka `src/database.php` učitava konfiguraciju i vraća PDO objekt. Početna stranica dohvaća broj treninga i prikazuje
+ga korisniku.
+
+Ručno su provjereni:
+
+- prikaz `Workouts: 0` uz ispravnu konfiguraciju i HTTP status 200;
+- generička poruka uz neispravan naziv baze i HTTP status 500;
+- povratak normalnog prikaza nakon vraćanja ispravne konfiguracije.
+
+Tehnički detalji pogreške zapisuju se u PHP zapisnik.
+
+### Preostale provjere baze
+
+Valjani unosi serija, jedinstvenost njihova redoslijeda uz valjane roditeljske zapise te izolirano i kaskadno brisanje
+serija ostaju za naknadnu provjeru. Punjenje baze probnim podatcima trenutačno je odgođeno.
+
 ### Sljedeća cjelina
 
-Slijede zaseban korisnički račun baze za aplikaciju i povezivanje PHP-a s MySQL-om preko PDO-a.
+Slijedi dohvat i prikaz popisa treninga, uključujući poruku kada nema zapisa.
 
-PHP validacija još nije izrađena. Obuhvatit će i zabranu budućeg datuma treninga, decimalnih ponavljanja te težine s
-više od dvije decimale. Sama pretvorba vrijednosti u SQL tip ne zamjenjuje provjeru izvornog unosa.
+PHP validacija korisničkih unosa slijedi uz obrasce. Obuhvatit će i zabranu budućeg datuma treninga, decimalnih
+ponavljanja te težine s više od dvije decimale. Sama pretvorba vrijednosti u SQL tip ne zamjenjuje provjeru izvornog
+unosa.
