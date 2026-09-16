@@ -218,49 +218,62 @@ Ovaj model ne sprema povijest promjena naziva.
 - **Preimenovanje vježbe:** promjena naziva kataloške vježbe prikazuje se i u ranijim treninzima. Povijest promjena
   naziva ne spremamo.
 
-Za tablicu `sets` još treba odrediti točne SQL tipove, dopuštene raspone brojeva i težine te ograničenja baze.
+SQL tipovi i ograničenja svih četiriju tablica definirani su u `database/schema.sql`. Trenutačno stanje i opseg provjera
+opisani su u poglavlju 7. Provjera korisničkog unosa u PHP-u slijedi pri izradi aplikacijskih funkcionalnosti.
 
 ## 7. Trenutačno stanje i sljedeći korak
 
-U bazi `gymlog` na MySQL poslužitelju 8.4.11 izrađene su tablice `workouts`, `exercises` i `workout_exercises`.
+U bazi `gymlog` na MySQL poslužitelju 8.4.11 izrađene su tablice `workouts`, `exercises`, `workout_exercises` i `sets`.
 
-Sve tri koriste InnoDB, skup znakova `utf8mb4` i kolaciju `utf8mb4_0900_as_ci`. Svaka ima primarni ključ `id` tipa `INT UNSIGNED` s automatskim dodjeljivanjem vrijednosti.
+Sve četiri koriste InnoDB, skup znakova `utf8mb4` i kolaciju `utf8mb4_0900_as_ci`. Svaka ima primarni ključ `id` tipa
+`INT UNSIGNED` s automatskim dodjeljivanjem vrijednosti.
 
 ### Stupci izrađenih tablica
 
-| Tablica | Stupac | Tip i obveznost |
-| --- | --- | --- |
-| `workouts` | `workout_date` | `DATE NOT NULL` |
-| `workouts` | `name` | `VARCHAR(100) NOT NULL` |
-| `workouts` | `note` | `TEXT`, dopušten `NULL` |
-| `exercises` | `name` | `VARCHAR(100) NOT NULL` |
-| `workout_exercises` | `workout_id` | `INT UNSIGNED NOT NULL` |
-| `workout_exercises` | `exercise_id` | `INT UNSIGNED NOT NULL` |
-| `workout_exercises` | `position` | `INT UNSIGNED NOT NULL` |
+| Tablica             | Stupac                | Tip i obveznost              |
+|---------------------|-----------------------|------------------------------|
+| `workouts`          | `workout_date`        | `DATE NOT NULL`              |
+| `workouts`          | `name`                | `VARCHAR(100) NOT NULL`      |
+| `workouts`          | `note`                | `TEXT`, dopušten `NULL`      |
+| `exercises`         | `name`                | `VARCHAR(100) NOT NULL`      |
+| `workout_exercises` | `workout_id`          | `INT UNSIGNED NOT NULL`      |
+| `workout_exercises` | `exercise_id`         | `INT UNSIGNED NOT NULL`      |
+| `workout_exercises` | `position`            | `INT UNSIGNED NOT NULL`      |
+| `sets`              | `workout_exercise_id` | `INT UNSIGNED NOT NULL`      |
+| `sets`              | `set_number`          | `SMALLINT UNSIGNED NOT NULL` |
+| `sets`              | `reps`                | `SMALLINT UNSIGNED NOT NULL` |
+| `sets`              | `weight_kg`           | `DECIMAL(6,2) NOT NULL`      |
 
-### Provedena ograničenja
+Uz definirana ograničenja, redni broj serije i ponavljanja imaju raspon od 1 do 65535. Težina se pohranjuje s dvije
+decimale, u rasponu od 0.00 do 9999.99 kg. Nula označava izvođenje bez dodatnog opterećenja.
+
+### Definirana ograničenja
 
 - Nazivi treninga i vježbi ne smiju biti `NULL`, prazni ili sastavljeni samo od običnih razmaka.
 - Naziv kataloške vježbe mora biti jedinstven bez razlikovanja velikih i malih slova.
-- Pozicija vježbe u treningu mora biti veća od nule.
+- Pozicija vježbe, redni broj serije i broj ponavljanja moraju biti veći od nule.
+- Težina serije mora biti najmanje nula.
 - Par `workout_id` i `exercise_id` mora biti jedinstven.
 - Par `workout_id` i `position` mora biti jedinstven.
-- Strani ključevi zahtijevaju postojanje povezanog treninga i kataloške vježbe.
-- Brisanje treninga preko `ON DELETE CASCADE` uklanja njegove zapise u `workout_exercises`.
+- Par `workout_exercise_id` i `set_number` mora biti jedinstven.
+- Strani ključevi zahtijevaju postojanje povezanih roditeljskih zapisa.
+- Brisanje treninga preko `ON DELETE CASCADE` uklanja njegova pojavljivanja vježbi i njihove serije.
+- Brisanje pojavljivanja vježbe preko `ON DELETE CASCADE` uklanja njegove serije.
 - `ON DELETE RESTRICT` sprječava brisanje kataloške vježbe koja se koristi u treningu.
 
-### Ručne provjere
+### Provedene provjere
 
-Potvrđeni su unos i čitanje valjanih podataka te korištenje iste kataloške vježbe u različitim treninzima.
+Za prve tri tablice ranije su potvrđeni valjani unosi, korištenje iste kataloške vježbe u različitim treninzima te
+odbijanje nevaljanih naziva, duplikata, pozicije nula i nepostojećih povezanih ID-eva.
 
-Provjereno je odbijanje nevaljanih naziva, duplikata naziva koji se razlikuju samo po veličini slova, ponovljene vježbe u istom treningu, zauzete pozicije, pozicije nula i nepostojećih povezanih ID-eva.
+Na probnim zapisima tih tablica potvrđeno je da brisanje korištene kataloške vježbe bude odbijeno, dok brisanje treninga
+uklanja njegovu vezu i čuva katalošku vježbu. Nekorištenu katalošku vježbu moguće je obrisati.
 
-Na zasebnim probnim zapisima potvrđeno je da brisanje korištene kataloške vježbe bude odbijeno, dok brisanje treninga uklanja njegovu vezu i čuva katalošku vježbu. Nekorištenu katalošku vježbu moguće je obrisati.
-
-Probni podatci nisu dio početne SQL sheme.
+Tablica `sets` uspješno je stvorena. Nevaljani unosi korišteni u ručnoj provjeri bili su odbijeni.
 
 ### Sljedeća cjelina
 
-Slijedi tablica `sets`, koja će spremati pojedinačne serije vježbe u konkretnom treningu: redni broj serije, ponavljanja i težinu.
+Slijede zaseban korisnički račun baze za aplikaciju i povezivanje PHP-a s MySQL-om preko PDO-a.
 
-Povezivanje aplikacije preko PDO-a i PHP validacija, uključujući zabranu budućeg datuma treninga, još nisu izrađeni.
+PHP validacija još nije izrađena. Obuhvatit će i zabranu budućeg datuma treninga, decimalnih ponavljanja te težine s
+više od dvije decimale. Sama pretvorba vrijednosti u SQL tip ne zamjenjuje provjeru izvornog unosa.
