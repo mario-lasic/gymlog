@@ -7,7 +7,7 @@ by step, with an emphasis on understanding the code, database design, and Git wo
 
 - The MySQL schema contains four tables: `workouts`, `exercises`, `workout_exercises`, and `sets`.
 - PHP connects to MySQL through PDO using a dedicated application account.
-- The home page displays the number of workouts.
+- The home page lists workouts by date, newest first, and displays an empty-state message when no workouts exist.
 - Database failures return HTTP 500 and a generic message. Technical details are written to the PHP error log.
 - Local database credentials are excluded from Git.
 
@@ -49,7 +49,9 @@ php -S 127.0.0.1:8000 -t public
 - `127.0.0.1:8000` makes it available locally on port 8000.
 - `-t public` sets the public document root.
 
-Open [GymLog locally](http://127.0.0.1:8000/). An empty database displays **Workouts: 0**.
+Open [GymLog locally](http://127.0.0.1:8000/). An empty database displays **No workouts yet**.
+Displaying populated rows, checking their order, and verifying special-character escaping remain to be tested with
+workout data.
 
 Keep the terminal open while using the application. Press **Ctrl+C** to stop the server. This server is intended for
 local development.

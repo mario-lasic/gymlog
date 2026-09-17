@@ -279,14 +279,23 @@ Aplikacija za povezivanje ne koristi administratorski račun.
 Konfiguracijski predložak nalazi se u `config/database.example.php`. Stvarni pristupni podatci nalaze se u lokalnoj
 datoteci `config/database.local.php`, koja je izuzeta iz Gita.
 
-Datoteka `src/database.php` učitava konfiguraciju i vraća PDO objekt. Početna stranica dohvaća broj treninga i prikazuje
-ga korisniku.
+Ručno su provjereni:
+
+- prikaz poruke `No workouts yet.` kada u bazi nema treninga;
+- tijekom prethodne cjeline PDO povezivanja: uspješan odgovor HTTP 200, generička poruka i HTTP 500 uz neispravan naziv
+  baze te povratak normalnog prikaza nakon vraćanja ispravne konfiguracije.
+
+Prikaz popunjenih redaka, sortiranje treninga i siguran prikaz posebnih znakova još nisu provjereni s podatcima. Te
+provjere slijede nakon uvođenja treninga u bazu.
 
 Ručno su provjereni:
 
-- prikaz `Workouts: 0` uz ispravnu konfiguraciju i HTTP status 200;
-- generička poruka uz neispravan naziv baze i HTTP status 500;
-- povratak normalnog prikaza nakon vraćanja ispravne konfiguracije.
+- prikaz poruke `No workouts yet.` kada u bazi nema treninga;
+- tijekom prethodne cjeline PDO povezivanja: uspješan odgovor HTTP 200, generička poruka i HTTP 500 uz neispravan naziv
+  baze te povratak normalnog prikaza nakon vraćanja ispravne konfiguracije.
+
+Prikaz popunjenih redaka, sortiranje treninga i siguran prikaz posebnih znakova još nisu provjereni s podatcima. Te
+provjere slijede nakon uvođenja treninga u bazu.
 
 Tehnički detalji pogreške zapisuju se u PHP zapisnik.
 
@@ -297,7 +306,8 @@ serija ostaju za naknadnu provjeru. Punjenje baze probnim podatcima trenutačno 
 
 ### Sljedeća cjelina
 
-Slijedi dohvat i prikaz popisa treninga, uključujući poruku kada nema zapisa.
+Slijedi izrada obrasca za stvaranje treninga s datumom, nazivom i bilješkom, uz provjeru korisničkog unosa i spremanje
+preko PDO pripremljenog upita.
 
 PHP validacija korisničkih unosa slijedi uz obrasce. Obuhvatit će i zabranu budućeg datuma treninga, decimalnih
 ponavljanja te težine s više od dvije decimale. Sama pretvorba vrijednosti u SQL tip ne zamjenjuje provjeru izvornog
