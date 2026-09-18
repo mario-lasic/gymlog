@@ -50,5 +50,6 @@ try {
             </table>
         <?php
         endif; ?>
+        <a href="workout-create.php">Create Workout</a>
     </body>
 </html>

@@ -273,42 +273,47 @@ Tablica `sets` uspješno je stvorena. Nevaljani unosi korišteni u ručnoj provj
 
 ### Povezivanje aplikacije s bazom
 
-Izrađen je zaseban MySQL račun `gymlog_app` s pravima `SELECT`, `INSERT`, `UPDATE` i `DELETE` nad bazom `gymlog`.
-Aplikacija za povezivanje ne koristi administratorski račun.
+Aplikacija koristi zaseban MySQL račun `gymlog_app` s pravima `SELECT`, `INSERT`, `UPDATE` i `DELETE` nad bazom `gymlog`.
 
-Konfiguracijski predložak nalazi se u `config/database.example.php`. Stvarni pristupni podatci nalaze se u lokalnoj
-datoteci `config/database.local.php`, koja je izuzeta iz Gita.
+Konfiguracijski predložak nalazi se u `config/database.example.php`. Stvarni pristupni podatci nalaze se u `config/database.local.php`, koja je izuzeta iz Gita. Datoteka `src/database.php` učitava konfiguraciju i vraća PDO objekt.
 
-Ručno su provjereni:
+Početna stranica dohvaća treninge sortirane po datumu silazno, a zatim po ID-u silazno. Razlikuje pogrešku dohvaćanja, prazan popis i tablicu treninga. Vrijednosti se prije ispisa u HTML obrađuju funkcijom `htmlspecialchars()`.
 
-- prikaz poruke `No workouts yet.` kada u bazi nema treninga;
-- tijekom prethodne cjeline PDO povezivanja: uspješan odgovor HTTP 200, generička poruka i HTTP 500 uz neispravan naziv
-  baze te povratak normalnog prikaza nakon vraćanja ispravne konfiguracije.
+### Stvaranje treninga
 
-Prikaz popunjenih redaka, sortiranje treninga i siguran prikaz posebnih znakova još nisu provjereni s podatcima. Te
-provjere slijede nakon uvođenja treninga u bazu.
+Obrazac prima datum, naziv i neobveznu bilješku. Obrada POST zahtjeva uključuje provjeru CSRF tokena i validaciju na poslužitelju:
 
-Ručno su provjereni:
+- naziv nakon uklanjanja rubnih razmaka mora imati od 1 do 100 znakova;
+- bilješka nakon uklanjanja rubnih razmaka smije imati najviše 5000 znakova;
+- datum mora biti stvaran kalendarski datum u obliku `YYYY-MM-DD`;
+- dopušteni raspon datuma je od `1000-01-01` do današnjeg dana u vremenskoj zoni `Europe/Zagreb`.
 
-- prikaz poruke `No workouts yet.` kada u bazi nema treninga;
-- tijekom prethodne cjeline PDO povezivanja: uspješan odgovor HTTP 200, generička poruka i HTTP 500 uz neispravan naziv
-  baze te povratak normalnog prikaza nakon vraćanja ispravne konfiguracije.
+Valjani podatci spremaju se pripremljenim PDO upitom. Prazna bilješka sprema se kao SQL `NULL`. Nakon uspjeha aplikacija preusmjerava na popis uz HTTP status 303.
 
-Prikaz popunjenih redaka, sortiranje treninga i siguran prikaz posebnih znakova još nisu provjereni s podatcima. Te
-provjere slijede nakon uvođenja treninga u bazu.
+Pri pogrešci baze aplikacija postavlja HTTP 500, prikazuje generičku poruku i zadržava unesene vrijednosti. Tehnički detalj zapisuje se u PHP zapisnik.
 
-Tehnički detalji pogreške zapisuju se u PHP zapisnik.
+### Provedene provjere aplikacije
 
-### Preostale provjere baze
+Ručno su potvrđeni:
 
-Valjani unosi serija, jedinstvenost njihova redoslijeda uz valjane roditeljske zapise te izolirano i kaskadno brisanje
-serija ostaju za naknadnu provjeru. Punjenje baze probnim podatcima trenutačno je odgođeno.
+- prikaz praznog popisa;
+- spremanje treninga i prikaz na popisu;
+- osvježavanje popisa bez dodatnog unosa;
+- pohrana i prikaz posebnih znakova u nazivu;
+- spremanje prazne bilješke kao SQL `NULL`;
+- odbijanje naziva sastavljenog od razmaka uz očuvanu bilješku;
+- odbijanje izmijenjenog CSRF tokena;
+- odbijanje budućeg, nepostojećeg i prerano datiranog treninga;
+- generička poruka pri neuspjelom dohvaćanju ili spremanju zbog neispravne konfiguracije baze.
+
+### Preostale provjere
+
+Preostaju provjere sortiranja više treninga, uključujući treninge istog datuma, te dodatne provjere graničnih duljina polja.
+
+Za tablicu `sets` ostaju odgođeni valjani unosi, provjera jedinstvenosti redoslijeda uz valjane roditeljske zapise te izolirano i kaskadno brisanje serija.
+
+Validacija ponavljanja i težine slijedi uz njihove obrasce. Sama pretvorba vrijednosti u SQL tip ne zamjenjuje provjeru izvornog unosa.
 
 ### Sljedeća cjelina
 
-Slijedi izrada obrasca za stvaranje treninga s datumom, nazivom i bilješkom, uz provjeru korisničkog unosa i spremanje
-preko PDO pripremljenog upita.
-
-PHP validacija korisničkih unosa slijedi uz obrasce. Obuhvatit će i zabranu budućeg datuma treninga, decimalnih
-ponavljanja te težine s više od dvije decimale. Sama pretvorba vrijednosti u SQL tip ne zamjenjuje provjeru izvornog
-unosa.
+Slijedi stranica detalja treninga s prikazom datuma, naziva i bilješke te obradom nevaljanog ili nepostojećeg ID-a.

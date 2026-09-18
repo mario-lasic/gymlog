@@ -11,11 +11,16 @@ by step, with an emphasis on understanding the code, database design, and Git wo
 - Database failures return HTTP 500 and a generic message. Technical details are written to the PHP error log.
 - Local database credentials are excluded from Git.
 
-Workout forms, history, editing, and deletion are not implemented yet.
+Workouts can now be created through a form with a date, name, and optional note. The application validates input on the
+server, checks a session-based CSRF token, and saves valid data using a PDO prepared statement. Successful submission
+redirects to the workout list.
+
+Workout details, exercise and set entry, editing, and deletion are not implemented yet.
 
 ## Technologies and requirements
 
 - PHP with the PDO MySQL extension.
+- mbstring
 - MySQL.
 - HTML; CSS styling is planned.
 - A web browser.
@@ -65,19 +70,28 @@ php -l config/database.example.php
 php -l config/database.local.php
 php -l src/database.php
 php -l public/index.php
+php -l public/workout-create.php
 ```
 
 The `-l` option checks syntax without executing the code.
 
 Manual checks completed:
 
-- Valid configuration displays the workout count and returns HTTP 200.
-- An invalid database name displays **Unable to load workouts.** and returns HTTP 500.
-- Restoring the correct configuration restores normal operation.
+- An empty workout list displays **No workouts yet.**
+- A valid workout is saved and displayed on the list.
+- Refreshing the list after submission does not create another workout.
+- Special characters in the workout name are preserved and displayed as text.
+- An empty note is stored as SQL `NULL`.
+- A name containing only spaces is rejected, while the entered note is retained.
+- A modified CSRF token is rejected.
+- Future dates, nonexistent calendar dates, and dates before `1000-01-01` are rejected.
+- An invalid database configuration produces a generic error message when loading or saving workouts.
+
+Sorting multiple workouts, including workouts with the same date, and additional field-length boundary checks remain to be tested.
 
 Database schema rules and the scope of their verification are documented in `docs/database-design.md`.
 
-## Planned first version
+## First-version scope
 
 - Create workouts with a date, name, and note.
 - Add exercises to each workout.
