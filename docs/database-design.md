@@ -273,24 +273,31 @@ Tablica `sets` uspješno je stvorena. Nevaljani unosi korišteni u ručnoj provj
 
 ### Povezivanje aplikacije s bazom
 
-Aplikacija koristi zaseban MySQL račun `gymlog_app` s pravima `SELECT`, `INSERT`, `UPDATE` i `DELETE` nad bazom `gymlog`.
+Aplikacija koristi zaseban MySQL račun `gymlog_app` s pravima `SELECT`, `INSERT`, `UPDATE` i `DELETE` nad bazom
+`gymlog`.
 
-Konfiguracijski predložak nalazi se u `config/database.example.php`. Stvarni pristupni podatci nalaze se u `config/database.local.php`, koja je izuzeta iz Gita. Datoteka `src/database.php` učitava konfiguraciju i vraća PDO objekt.
+Konfiguracijski predložak nalazi se u `config/database.example.php`. Stvarni pristupni podatci nalaze se u
+`config/database.local.php`, koja je izuzeta iz Gita. Datoteka `src/database.php` učitava konfiguraciju i vraća PDO
+objekt.
 
-Početna stranica dohvaća treninge sortirane po datumu silazno, a zatim po ID-u silazno. Razlikuje pogrešku dohvaćanja, prazan popis i tablicu treninga. Vrijednosti se prije ispisa u HTML obrađuju funkcijom `htmlspecialchars()`.
+Početna stranica dohvaća treninge sortirane po datumu silazno, a zatim po ID-u silazno. Razlikuje pogrešku dohvaćanja,
+prazan popis i tablicu treninga. Vrijednosti se prije ispisa u HTML obrađuju funkcijom `htmlspecialchars()`.
 
 ### Stvaranje treninga
 
-Obrazac prima datum, naziv i neobveznu bilješku. Obrada POST zahtjeva uključuje provjeru CSRF tokena i validaciju na poslužitelju:
+Obrazac prima datum, naziv i neobveznu bilješku. Obrada POST zahtjeva uključuje provjeru CSRF tokena i validaciju na
+poslužitelju:
 
 - naziv nakon uklanjanja rubnih razmaka mora imati od 1 do 100 znakova;
 - bilješka nakon uklanjanja rubnih razmaka smije imati najviše 5000 znakova;
 - datum mora biti stvaran kalendarski datum u obliku `YYYY-MM-DD`;
 - dopušteni raspon datuma je od `1000-01-01` do današnjeg dana u vremenskoj zoni `Europe/Zagreb`.
 
-Valjani podatci spremaju se pripremljenim PDO upitom. Prazna bilješka sprema se kao SQL `NULL`. Nakon uspjeha aplikacija preusmjerava na popis uz HTTP status 303.
+Valjani podatci spremaju se pripremljenim PDO upitom. Prazna bilješka sprema se kao SQL `NULL`. Nakon uspjeha aplikacija
+preusmjerava na popis uz HTTP status 303.
 
-Pri pogrešci baze aplikacija postavlja HTTP 500, prikazuje generičku poruku i zadržava unesene vrijednosti. Tehnički detalj zapisuje se u PHP zapisnik.
+Pri pogrešci baze aplikacija postavlja HTTP 500, prikazuje generičku poruku i zadržava unesene vrijednosti. Tehnički
+detalj zapisuje se u PHP zapisnik.
 
 ### Provedene provjere aplikacije
 
@@ -308,12 +315,32 @@ Ručno su potvrđeni:
 
 ### Preostale provjere
 
-Preostaju provjere sortiranja više treninga, uključujući treninge istog datuma, te dodatne provjere graničnih duljina polja.
+Preostaju provjere sortiranja više treninga, uključujući treninge istog datuma, te dodatne provjere graničnih duljina
+polja.
 
-Za tablicu `sets` ostaju odgođeni valjani unosi, provjera jedinstvenosti redoslijeda uz valjane roditeljske zapise te izolirano i kaskadno brisanje serija.
+Za tablicu `sets` ostaju odgođeni valjani unosi, provjera jedinstvenosti redoslijeda uz valjane roditeljske zapise te
+izolirano i kaskadno brisanje serija.
 
-Validacija ponavljanja i težine slijedi uz njihove obrasce. Sama pretvorba vrijednosti u SQL tip ne zamjenjuje provjeru izvornog unosa.
+Validacija ponavljanja i težine slijedi uz njihove obrasce. Sama pretvorba vrijednosti u SQL tip ne zamjenjuje provjeru
+izvornog unosa.
+
+### Detalji treninga
+
+Stranica detalja dohvaća pojedinačni trening prema ID-u pomoću PDO pripremljenog upita. Prikazuje datum, naziv i
+bilješku. Za praznu bilješku prikazuje se poruka, a tekstualni izlaz HTML-escapira se uz očuvanje prijeloma redaka
+bilješke.
+
+Korisnik je potvrdio:
+
+- prikaz postojećeg treninga uz HTTP 200;
+- odbijanje nedostajućeg ili nevaljanog ID-a uz HTTP 400;
+- poruku za nepostojeći trening uz HTTP 404;
+- prikaz posebnih znakova kao običnog teksta.
+
+Obrada pogreške baze implementirana je uz HTTP 500, generičku poruku i zapis tehničkih pojedinosti u PHP log. Ta
+provjera na stranici detalja još nije zasebno potvrđena.
 
 ### Sljedeća cjelina
 
-Slijedi stranica detalja treninga s prikazom datuma, naziva i bilješke te obradom nevaljanog ili nepostojećeg ID-a.
+Slijedi uređivanje datuma, naziva i bilješke postojećeg treninga uz validaciju unosa, CSRF zaštitu i PDO pripremljeni
+upit.

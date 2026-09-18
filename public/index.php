@@ -43,7 +43,7 @@ try {
                 foreach ($workouts as $workout): ?>
                     <tr>
                         <td><?= htmlspecialchars($workout['workout_date'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></td>
-                        <td><?= htmlspecialchars($workout['name'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></td>
+                        <td><a href="workout.php?id=<?= $workout['id'] ?>"><?= htmlspecialchars($workout['name'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></a></td>
                     </tr>
                 <?php
                 endforeach; ?>

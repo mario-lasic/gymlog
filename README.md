@@ -15,7 +15,10 @@ Workouts can now be created through a form with a date, name, and optional note.
 server, checks a session-based CSRF token, and saves valid data using a PDO prepared statement. Successful submission
 redirects to the workout list.
 
-Workout details, exercise and set entry, editing, and deletion are not implemented yet.
+Each workout has a details page displaying its date, name, and optional note. Invalid IDs return HTTP 400, while valid
+IDs without a matching workout return HTTP 404. Output is escaped, and note line breaks are preserved.
+
+Exercise and set entry, editing, and deletion are not implemented yet.
 
 ## Technologies and requirements
 
@@ -71,6 +74,7 @@ php -l config/database.local.php
 php -l src/database.php
 php -l public/index.php
 php -l public/workout-create.php
+php -l public/workout.php
 ```
 
 The `-l` option checks syntax without executing the code.
@@ -86,8 +90,13 @@ Manual checks completed:
 - A modified CSRF token is rejected.
 - Future dates, nonexistent calendar dates, and dates before `1000-01-01` are rejected.
 - An invalid database configuration produces a generic error message when loading or saving workouts.
+- An existing workout opens on its details page with HTTP 200.
+- Missing or invalid workout IDs return HTTP 400.
+- A valid but nonexistent workout ID returns HTTP 404.
+- Special characters on the details page are displayed as text.
 
-Sorting multiple workouts, including workouts with the same date, and additional field-length boundary checks remain to be tested.
+Sorting multiple workouts, including workouts with the same date, and additional field-length boundary checks remain to
+be tested.
 
 Database schema rules and the scope of their verification are documented in `docs/database-design.md`.
 
