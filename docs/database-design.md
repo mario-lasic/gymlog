@@ -340,7 +340,22 @@ Korisnik je potvrdio:
 Obrada pogreške baze implementirana je uz HTTP 500, generičku poruku i zapis tehničkih pojedinosti u PHP log. Ta
 provjera na stranici detalja još nije zasebno potvrđena.
 
+### Uređivanje treninga
+
+Obrazac se popunjava postojećim datumom, nazivom i bilješkom. Prije obrade unosa provjeravaju se ID i postojanje
+treninga. POST obrada uključuje CSRF zaštitu i ista pravila validacije kao stvaranje treninga.
+
+Promjene se spremaju pripremljenim PDO UPDATE upitom ograničenim na ID treninga. Prazna bilješka sprema se kao SQL
+`NULL`. Nakon uspjeha slijedi preusmjeravanje statusom 303 na detalje istog treninga.
+
+Potvrđeni su spremanje izmjena, spremanje bez promjena, pražnjenje bilješke, očuvanje unosa nakon nevaljanog naziva,
+odbijanje izmijenjenog CSRF tokena i obrada nevaljanog ili nepostojećeg ID-a. Zasebno je potvrđeno da POST za
+nepostojeći trening vraća 404 bez spremanja.
+
+Obrada pogreške spremanja implementirana je uz HTTP 500, generičku poruku i očuvanje obrasca. Izolirana provjera
+pogreške UPDATE upita još nije potvrđena.
+
 ### Sljedeća cjelina
 
-Slijedi uređivanje datuma, naziva i bilješke postojećeg treninga uz validaciju unosa, CSRF zaštitu i PDO pripremljeni
-upit.
+Slijedi izdvajanje zajedničke validacije i HTML obrasca za stvaranje i uređivanje treninga, uz očuvanje postojećeg
+ponašanja.

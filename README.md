@@ -18,7 +18,11 @@ redirects to the workout list.
 Each workout has a details page displaying its date, name, and optional note. Invalid IDs return HTTP 400, while valid
 IDs without a matching workout return HTTP 404. Output is escaped, and note line breaks are preserved.
 
-Exercise and set entry, editing, and deletion are not implemented yet.
+Existing workouts can be edited through a prefilled form. Updates use server-side validation, CSRF protection, and a PDO
+prepared statement. Validation errors preserve entered values, and successful updates redirect to the same workout's
+details page.
+
+Exercise and set entry, along with deletion, are not implemented yet.
 
 ## Technologies and requirements
 
@@ -75,6 +79,7 @@ php -l src/database.php
 php -l public/index.php
 php -l public/workout-create.php
 php -l public/workout.php
+php -l public/workout-edit.php
 ```
 
 The `-l` option checks syntax without executing the code.
@@ -94,6 +99,12 @@ Manual checks completed:
 - Missing or invalid workout IDs return HTTP 400.
 - A valid but nonexistent workout ID returns HTTP 404.
 - Special characters on the details page are displayed as text.
+- Editing updates the existing workout without creating another record.
+- Saving unchanged values succeeds.
+- Clearing the note stores SQL `NULL`.
+- Invalid edit input preserves entered values without updating the database.
+- An altered CSRF token on the edit form returns HTTP 403.
+- Submitting the edit form for a nonexistent workout returns HTTP 404 without saving.
 
 Sorting multiple workouts, including workouts with the same date, and additional field-length boundary checks remain to
 be tested.

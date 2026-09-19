@@ -58,6 +58,7 @@ if ($id === false) {
                 <p><?= nl2br(htmlspecialchars($workout['note'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')) ?></p>
             <?php
             endif; ?>
+            <a href="workout-edit.php?id=<?= $workout['id'] ?>">Edit workout</a>
         <?php
         endif; ?>
         <a href="/">Back to workouts</a>
