@@ -355,7 +355,21 @@ nepostojeći trening vraća 404 bez spremanja.
 Obrada pogreške spremanja implementirana je uz HTTP 500, generičku poruku i očuvanje obrasca. Izolirana provjera
 pogreške UPDATE upita još nije potvrđena.
 
+### Zajednička validacija i obrazac
+
+Stvaranje i uređivanje treninga koriste funkciju `validateWorkout()` iz `src/workout-validation.php`. Funkcija prima
+ulazno polje i vraća obrađeni datum, naziv, bilješku i pogreške validacije.
+
+Zajednički HTML nalazi se u `templates/workout-form.php`. Stranice pripremaju vrijednosti polja, pogreške, CSRF token,
+odredište obrasca i tekst gumba. Dohvat podataka, CSRF provjera, spremanje i preusmjeravanje ostaju u pojedinačnim
+stranicama.
+
+Nakon izdvajanja validacije potvrđene su provjere valjanog unosa, naziva od razmaka uz očuvanu bilješku, budućeg i
+nepostojećeg datuma te prazne bilješke na oba obrasca.
+
+Nakon povezivanja zajedničkog predloška potvrđeno je uređivanje istog treninga bez novog retka, očuvanje bilješke nakon
+nevaljanog naziva te HTTP 404 bez obrasca za nepostojeći trening.
+
 ### Sljedeća cjelina
 
-Slijedi izdvajanje zajedničke validacije i HTML obrasca za stvaranje i uređivanje treninga, uz očuvanje postojećeg
-ponašanja.
+Slijedi brisanje treninga uz prethodnu potvrdu, POST zahtjev i CSRF zaštitu.

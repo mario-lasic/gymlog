@@ -22,6 +22,10 @@ Existing workouts can be edited through a prefilled form. Updates use server-sid
 prepared statement. Validation errors preserve entered values, and successful updates redirect to the same workout's
 details page.
 
+Workout creation and editing share validation in `src/workout-validation.php` and an HTML form template in
+`templates/workout-form.php`. Each page retains its own request handling, CSRF checks, database operations, and
+redirects.
+
 Exercise and set entry, along with deletion, are not implemented yet.
 
 ## Technologies and requirements
@@ -80,6 +84,8 @@ php -l public/index.php
 php -l public/workout-create.php
 php -l public/workout.php
 php -l public/workout-edit.php
+php -l src/workout-validation.php
+php -l templates/workout-form.php
 ```
 
 The `-l` option checks syntax without executing the code.
