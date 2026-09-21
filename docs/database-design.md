@@ -370,6 +370,20 @@ nepostojećeg datuma te prazne bilješke na oba obrasca.
 Nakon povezivanja zajedničkog predloška potvrđeno je uređivanje istog treninga bez novog retka, očuvanje bilješke nakon
 nevaljanog naziva te HTTP 404 bez obrasca za nepostojeći trening.
 
+### Brisanje treninga
+
+GET zahtjev prikazuje potvrdu s nazivom, datumom i upozorenjem o posljedicama brisanja. Brisanje se izvršava samo POST
+zahtjevom, nakon provjere ID-a, postojanja treninga i CSRF tokena.
+
+Pripremljeni PDO DELETE upit ograničen je na odabrani ID. Nakon uspjeha slijedi preusmjeravanje na popis uz HTTP 303.
+Pogreška brisanja obrađuje se statusom 500 i generičkom porukom, uz zapis tehničkih detalja u PHP log.
+
+Potvrđeno je da otvaranje, osvježavanje i odustajanje ne brišu trening, izmijenjeni CSRF token vraća 403 bez brisanja,
+valjan POST uklanja odabrani probni trening, a njegovi detalji nakon brisanja vraćaju 404.
+
+Kaskadno brisanje povezanih zapisa vježbi i serija definirano je stranim ključevima, ali još nije provjereno na treningu
+s tim zapisima. Izolirana provjera pogreške DELETE upita također ostaje otvorena.
+
 ### Sljedeća cjelina
 
-Slijedi brisanje treninga uz prethodnu potvrdu, POST zahtjev i CSRF zaštitu.
+Slijedi katalog vježbi: pregled postojećih vježbi i stvaranje nove vježbe uz validaciju naziva.

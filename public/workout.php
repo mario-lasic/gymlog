@@ -59,6 +59,7 @@ if ($id === false) {
             <?php
             endif; ?>
             <a href="workout-edit.php?id=<?= $workout['id'] ?>">Edit workout</a>
+            <a href="workout-delete.php?id=<?= $workout['id'] ?>">Delete Workout</a>
         <?php
         endif; ?>
         <a href="/">Back to workouts</a>

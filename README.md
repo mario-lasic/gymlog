@@ -26,7 +26,10 @@ Workout creation and editing share validation in `src/workout-validation.php` an
 `templates/workout-form.php`. Each page retains its own request handling, CSRF checks, database operations, and
 redirects.
 
-Exercise and set entry, along with deletion, are not implemented yet.
+Workouts can be deleted through a confirmation page. Deletion requires a POST request and a valid CSRF token. Successful
+deletion redirects to the workout list.
+
+Exercise and set entry are not implemented yet.
 
 ## Technologies and requirements
 
@@ -86,6 +89,7 @@ php -l public/workout.php
 php -l public/workout-edit.php
 php -l src/workout-validation.php
 php -l templates/workout-form.php
+php -l public/workout-delete.php
 ```
 
 The `-l` option checks syntax without executing the code.
@@ -111,6 +115,10 @@ Manual checks completed:
 - Invalid edit input preserves entered values without updating the database.
 - An altered CSRF token on the edit form returns HTTP 403.
 - Submitting the edit form for a nonexistent workout returns HTTP 404 without saving.
+- Opening, refreshing, or cancelling the deletion confirmation leaves the workout unchanged.
+- An altered CSRF token prevents deletion and returns HTTP 403.
+- A valid deletion removes only the selected test workout and returns to the list.
+- Opening the deleted workout's details returns HTTP 404.
 
 Sorting multiple workouts, including workouts with the same date, and additional field-length boundary checks remain to
 be tested.
