@@ -394,6 +394,23 @@ Potvrđene su provjere sintakse stranice kataloga i početne stranice te prikaz 
 prikaz posebnih znakova na popunjenom katalogu provjerit će se nakon dodavanja vježbi. Zasebna provjera pogreške
 dohvaćanja još nije potvrđena.
 
+### Stvaranje vježbe
+
+Obrazac prima naziv vježbe. POST obrada provjerava CSRF token, tip unosa i duljinu naziva nakon uklanjanja rubnih
+razmaka. Dopušteno je od 1 do 100 znakova.
+
+Naziv se sprema pripremljenim PDO INSERT upitom. UNIQUE ograničenje sprečava duplikate; MySQL kod 1062 obrađuje se
+porukom uz polje naziva, uz očuvanje unosa. Ostale pogreške baze obrađuju se statusom 500, generičkom porukom i zapisom
+u PHP log.
+
+Nakon uspjeha slijedi preusmjeravanje na katalog uz HTTP 303.
+
+Potvrđeni su valjan unos, odbijanje duplikata uključujući rubne razmake, odbijanje naziva od samih razmaka te odbijanje
+izmijenjenog CSRF tokena bez spremanja.
+
+Sortiranje i posebni znakovi na popunjenom katalogu, granične duljine naziva te izolirana pogreška spremanja još nisu
+zasebno potvrđeni.
+
 ### Sljedeća cjelina
 
-Slijedi stvaranje nove vježbe uz validaciju naziva, CSRF zaštitu i obradu naziva koji već postoji u katalogu.
+Slijedi dodavanje postojeće vježbe iz kataloga u trening preko tablice `workout_exercises`.

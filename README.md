@@ -32,7 +32,11 @@ deletion redirects to the workout list.
 Exercise and set entry are not implemented yet.
 
 The exercise catalog lists exercise names alphabetically and displays an empty-state message when no exercises exist. It
-is accessible from the workout list, with navigation back to workouts. Exercise creation is not implemented yet.
+is accessible from the workout list, with navigation back to workouts. The exercise catalog lists exercise names
+alphabetically and displays an empty-state message when no exercises exist. New exercises can be created through a form
+with server-side name validation and CSRF protection. Duplicate names produce a field-level error.
+
+Adding catalog exercises to workouts and recording sets are not implemented yet.
 
 ## Technologies and requirements
 
@@ -94,6 +98,7 @@ php -l src/workout-validation.php
 php -l templates/workout-form.php
 php -l public/workout-delete.php
 php -l public/exercises.php
+php -l public/exercise-create.php
 ```
 
 The `-l` option checks syntax without executing the code.
@@ -123,6 +128,10 @@ Manual checks completed:
 - An altered CSRF token prevents deletion and returns HTTP 403.
 - A valid deletion removes only the selected test workout and returns to the list.
 - Opening the deleted workout's details returns HTTP 404.
+- - A valid exercise name is saved in the catalog.
+- Duplicate names, including submissions with surrounding spaces, are rejected without creating another record.
+- Names containing only spaces are rejected.
+- An altered CSRF token prevents exercise creation and returns HTTP 403.
 
 Sorting multiple workouts, including workouts with the same date, and additional field-length boundary checks remain to
 be tested.

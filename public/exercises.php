@@ -43,6 +43,7 @@ try {
             </ul>
         <?php
         endif; ?>
+        <a href="exercise-create.php">Create exercise</a>
         <a href="index.php">Back to workouts</a>
     </body>
 </html>
