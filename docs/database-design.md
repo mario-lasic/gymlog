@@ -384,6 +384,16 @@ valjan POST uklanja odabrani probni trening, a njegovi detalji nakon brisanja vr
 Kaskadno brisanje povezanih zapisa vježbi i serija definirano je stranim ključevima, ali još nije provjereno na treningu
 s tim zapisima. Izolirana provjera pogreške DELETE upita također ostaje otvorena.
 
+### Pregled kataloga vježbi
+
+Stranica `public/exercises.php` dohvaća ID i naziv vježbi iz tablice `exercises`, sortirano po nazivu uzlazno. Prikazuje
+popis naziva ili poruku za prazan katalog. Pogreške dohvaćanja obrađuju se statusom 500 i generičkom porukom, uz
+tehničke detalje u PHP logu.
+
+Potvrđene su provjere sintakse stranice kataloga i početne stranice te prikaz i navigacija u pregledniku. Sortiranje i
+prikaz posebnih znakova na popunjenom katalogu provjerit će se nakon dodavanja vježbi. Zasebna provjera pogreške
+dohvaćanja još nije potvrđena.
+
 ### Sljedeća cjelina
 
-Slijedi katalog vježbi: pregled postojećih vježbi i stvaranje nove vježbe uz validaciju naziva.
+Slijedi stvaranje nove vježbe uz validaciju naziva, CSRF zaštitu i obradu naziva koji već postoji u katalogu.

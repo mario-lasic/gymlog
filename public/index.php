@@ -51,5 +51,6 @@ try {
         <?php
         endif; ?>
         <a href="workout-create.php">Create Workout</a>
+        <a href="exercises.php">Exercises</a>
     </body>
 </html>

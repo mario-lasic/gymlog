@@ -31,6 +31,9 @@ deletion redirects to the workout list.
 
 Exercise and set entry are not implemented yet.
 
+The exercise catalog lists exercise names alphabetically and displays an empty-state message when no exercises exist. It
+is accessible from the workout list, with navigation back to workouts. Exercise creation is not implemented yet.
+
 ## Technologies and requirements
 
 - PHP with the PDO MySQL extension.
@@ -90,6 +93,7 @@ php -l public/workout-edit.php
 php -l src/workout-validation.php
 php -l templates/workout-form.php
 php -l public/workout-delete.php
+php -l public/exercises.php
 ```
 
 The `-l` option checks syntax without executing the code.
