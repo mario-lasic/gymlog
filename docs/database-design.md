@@ -411,6 +411,23 @@ izmijenjenog CSRF tokena bez spremanja.
 Sortiranje i posebni znakovi na popunjenom katalogu, granične duljine naziva te izolirana pogreška spremanja još nisu
 zasebno potvrđeni.
 
+### Dodavanje i prikaz vježbi u treningu
+
+Obrazac provjerava trening, CSRF token i pozitivan ID odabrane vježbe. Vježba mora postojati u katalogu i ne smije već
+biti povezana s istim treningom.
+
+Nova veza sprema se u `workout_exercises`. Pozicija se računa kao najveća postojeća pozicija tog treninga uvećana za
+jedan, odnosno 1 za prazan trening. UNIQUE ograničenja štite jedinstvenost vježbe i pozicije unutar treninga. Sukob pri
+spremanju obrađuje se porukom za ponovno učitavanje i pokušaj.
+
+Nakon uspjeha slijedi HTTP 303 preusmjeravanje na detalje treninga. Detalji povezuju `workout_exercises` i `exercises`
+INNER JOIN upitom, filtriraju prema treningu i prikazuju vježbe sortirane po poziciji.
+
+Potvrđeni su validacija odabira i CSRF zaštita, pozicije 1 i 2, odbijanje duplikata, dodavanje iste vježbe drugom
+treningu, odvojen prikaz vježbi po treningu, redoslijed, prazno stanje i osvježavanje bez dodatnog unosa.
+
+Sukob istodobnih upisa i izolirana pogreška spremanja nisu zasebno provjereni. Ranije odgođene provjere ostaju otvorene.
+
 ### Sljedeća cjelina
 
-Slijedi dodavanje postojeće vježbe iz kataloga u trening preko tablice `workout_exercises`.
+Slijedi uklanjanje pojedinačne vježbe iz treninga uz potvrdu i CSRF zaštitu. Kataloška vježba ostaje sačuvana.

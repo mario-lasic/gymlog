@@ -29,14 +29,14 @@ redirects.
 Workouts can be deleted through a confirmation page. Deletion requires a POST request and a valid CSRF token. Successful
 deletion redirects to the workout list.
 
-Exercise and set entry are not implemented yet.
+The exercise catalog lists exercise names alphabetically and supports creating exercises with name validation, CSRF
+protection, and duplicate handling.
 
-The exercise catalog lists exercise names alphabetically and displays an empty-state message when no exercises exist. It
-is accessible from the workout list, with navigation back to workouts. The exercise catalog lists exercise names
-alphabetically and displays an empty-state message when no exercises exist. New exercises can be created through a form
-with server-side name validation and CSRF protection. Duplicate names produce a field-level error.
+Existing catalog exercises can be added to workouts. Each exercise can appear once per workout, and new entries are
+appended after the highest existing position. Workout details display the linked exercises in position order, with an
+empty-state message when none have been added.
 
-Adding catalog exercises to workouts and recording sets are not implemented yet.
+Recording sets, removing individual exercises from workouts, and changing their order are not implemented yet.
 
 ## Technologies and requirements
 
@@ -99,6 +99,7 @@ php -l templates/workout-form.php
 php -l public/workout-delete.php
 php -l public/exercises.php
 php -l public/exercise-create.php
+php -l public/workout-exercise-create.php
 ```
 
 The `-l` option checks syntax without executing the code.
@@ -128,10 +129,17 @@ Manual checks completed:
 - An altered CSRF token prevents deletion and returns HTTP 403.
 - A valid deletion removes only the selected test workout and returns to the list.
 - Opening the deleted workout's details returns HTTP 404.
-- - A valid exercise name is saved in the catalog.
+- A valid exercise name is saved in the catalog.
 - Duplicate names, including submissions with surrounding spaces, are rejected without creating another record.
 - Names containing only spaces are rejected.
 - An altered CSRF token prevents exercise creation and returns HTTP 403.
+- The first two exercises added to an empty workout receive positions 1 and 2.
+- Adding the same exercise twice to one workout is rejected.
+- The same catalog exercise can be added to another workout.
+- Workout details display only that workout's exercises, ordered by position.
+- An empty workout displays an empty-state message and an Add exercise link.
+- Invalid or nonexistent workouts do not display the Add exercise link.
+- Refreshing workout details after adding an exercise does not create another entry.
 
 Sorting multiple workouts, including workouts with the same date, and additional field-length boundary checks remain to
 be tested.
