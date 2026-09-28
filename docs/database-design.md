@@ -428,6 +428,23 @@ treningu, odvojen prikaz vježbi po treningu, redoslijed, prazno stanje i osvje�
 
 Sukob istodobnih upisa i izolirana pogreška spremanja nisu zasebno provjereni. Ranije odgođene provjere ostaju otvorene.
 
+### Uklanjanje vježbe iz treninga
+
+Stranica potvrde koristi ID veze iz `workout_exercises`. JOIN upitom dohvaća naziv vježbe, naziv treninga i datum.
+Nevaljan ID vraća 400, a nepostojeća veza 404.
+
+Brisanje se izvršava samo POST zahtjevom uz valjan CSRF token. Pripremljeni DELETE upit uklanja odabranu vezu, a nakon
+uspjeha slijedi HTTP 303 preusmjeravanje na pripadajući trening.
+
+Kataloška vježba, njezine veze s drugim treninzima i preostale pozicije ostaju nepromijenjene. Praznine u redoslijedu
+dopuštene su.
+
+Potvrđeni su prikaz potvrde i povratna navigacija, odbijanje izmijenjenog CSRF tokena, uklanjanje samo odabrane veze,
+očuvanje kataloške vježbe i drugog treninga, očuvanje preostalih pozicija te 404 nakon uklanjanja veze.
+
+Kaskadno brisanje pripadajućih serija definirano je stranim ključem, ali još nije zasebno provjereno. Izolirana provjera
+pogreške DELETE upita također ostaje otvorena.
+
 ### Sljedeća cjelina
 
-Slijedi uklanjanje pojedinačne vježbe iz treninga uz potvrdu i CSRF zaštitu. Kataloška vježba ostaje sačuvana.
+Slijedi promjena redoslijeda vježbi unutar treninga.

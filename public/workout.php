@@ -82,6 +82,7 @@ if ($id === false) {
                     <tr>
                         <th>Position</th>
                         <th>Exercise</th>
+                        <th>Actions</th>
                     </tr>
                     <?php
                     foreach ($workoutExercises as $workoutExercise): ?>
@@ -96,6 +97,7 @@ if ($id === false) {
                                         ENT_QUOTES | ENT_SUBSTITUTE,
                                         'UTF-8'
                                 ) ?></td>
+                            <td><a href="workout-exercise-delete.php?id=<?= $workoutExercise['workout_exercise_id'] ?>">Remove</a></td>
                         </tr>
                     <?php
                     endforeach; ?>

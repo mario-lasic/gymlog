@@ -36,7 +36,10 @@ Existing catalog exercises can be added to workouts. Each exercise can appear on
 appended after the highest existing position. Workout details display the linked exercises in position order, with an
 empty-state message when none have been added.
 
-Recording sets, removing individual exercises from workouts, and changing their order are not implemented yet.
+Individual exercises can be removed from a workout through a confirmation page using POST and CSRF protection. The
+catalog exercise and its entries in other workouts remain unchanged. Remaining exercise positions are preserved.
+
+Recording sets and changing exercise order are not implemented yet.
 
 ## Technologies and requirements
 
@@ -100,6 +103,7 @@ php -l public/workout-delete.php
 php -l public/exercises.php
 php -l public/exercise-create.php
 php -l public/workout-exercise-create.php
+php -l public/workout-exercise-delete.php
 ```
 
 The `-l` option checks syntax without executing the code.
@@ -140,6 +144,11 @@ Manual checks completed:
 - An empty workout displays an empty-state message and an Add exercise link.
 - Invalid or nonexistent workouts do not display the Add exercise link.
 - Refreshing workout details after adding an exercise does not create another entry.
+- An altered CSRF token prevents removal and returns HTTP 403.
+- Removing an exercise deletes only the selected workout entry and redirects to its workout.
+- The catalog exercise and its entry in another workout remain unchanged.
+- Remaining exercise positions are preserved.
+- Opening the removed entry's confirmation page returns HTTP 404.
 
 Sorting multiple workouts, including workouts with the same date, and additional field-length boundary checks remain to
 be tested.
