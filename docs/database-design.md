@@ -445,6 +445,22 @@ očuvanje kataloške vježbe i drugog treninga, očuvanje preostalih pozicija te
 Kaskadno brisanje pripadajućih serija definirano je stranim ključem, ali još nije zasebno provjereno. Izolirana provjera
 pogreške DELETE upita također ostaje otvorena.
 
+### Promjena redoslijeda vježbi
+
+Gumbi Move Up i Move Down šalju POST zahtjev s ID-em veze, smjerom i CSRF tokenom. Obrada provjerava metodu zahtjeva,
+token, ID, smjer i postojanje veze.
+
+Unutar transakcije dohvaćaju se i zaključavaju veze odabranog treninga pomoću SELECT FOR UPDATE, sortirane po poziciji.
+Susjed se određuje prema indeksu u dohvaćenom popisu, čime postupak podržava praznine u pozicijama.
+
+Zamjena koristi tri UPDATE naredbe i privremenu poziciju iznad najveće postojeće. Nakon uspjeha izvršava se commit i
+HTTP 303 preusmjeravanje. Kod PDO pogreške aktivna transakcija poništava se pomoću rollBack.
+
+Pomicanje izvan početka ili kraja popisa ne mijenja podatke. Potvrđeni su pomicanje u oba smjera, ponašanje na rubovima,
+očuvanje ID-eva i broja veza, nepromijenjeni drugi trening te izostanak privremene pozicije nakon uspjeha.
+
+Namjerno izazvana pogreška usred zamjene i istodobni zahtjevi još nisu zasebno testirani.
+
 ### Sljedeća cjelina
 
-Slijedi promjena redoslijeda vježbi unutar treninga.
+Slijedi unos serije za vježbu unutar treninga: broj ponavljanja i težina u kilogramima, uz validaciju i CSRF zaštitu.

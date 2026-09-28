@@ -1,5 +1,12 @@
 <?php
 
+session_start();
+
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrfToken = $_SESSION['csrf_token'];
+
 $workout = null;
 $errorMessage = null;
 $workoutExercises = [];
@@ -97,7 +104,24 @@ if ($id === false) {
                                         ENT_QUOTES | ENT_SUBSTITUTE,
                                         'UTF-8'
                                 ) ?></td>
-                            <td><a href="workout-exercise-delete.php?id=<?= $workoutExercise['workout_exercise_id'] ?>">Remove</a></td>
+                            <td>
+                                <a href="workout-exercise-delete.php?id=<?= $workoutExercise['workout_exercise_id'] ?>">Remove</a>
+                                <form action="workout-exercise-move.php" method="post">
+                                    <input
+                                            type="hidden"
+                                            name="csrf_token"
+                                            value="<?= htmlspecialchars(
+                                                    $csrfToken,
+                                                    ENT_QUOTES | ENT_SUBSTITUTE,
+                                                    'UTF-8'
+                                            ) ?>"
+                                    >
+                                    <input type="hidden" name="workout_exercise_id"
+                                            value="<?= $workoutExercise['workout_exercise_id'] ?>">
+                                    <button type="submit" value="up" name="direction">Move Up</button>
+                                    <button type="submit" value="down" name="direction">Move Down</button>
+                                </form>
+                            </td>
                         </tr>
                     <?php
                     endforeach; ?>

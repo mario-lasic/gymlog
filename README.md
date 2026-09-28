@@ -39,7 +39,13 @@ empty-state message when none have been added.
 Individual exercises can be removed from a workout through a confirmation page using POST and CSRF protection. The
 catalog exercise and its entries in other workouts remain unchanged. Remaining exercise positions are preserved.
 
-Recording sets and changing exercise order are not implemented yet.
+Exercises can be moved up or down within a workout using POST requests with CSRF protection. Position swaps use a
+database transaction and row locking. Moving beyond the first or last exercise leaves the order unchanged.
+
+Manual checks confirmed movement in both directions, unchanged boundary positions, preserved entry IDs and row counts,
+and no changes to other workouts. No temporary position remains after a successful swap.
+
+Recording sets is not implemented yet.
 
 ## Technologies and requirements
 
@@ -104,6 +110,7 @@ php -l public/exercises.php
 php -l public/exercise-create.php
 php -l public/workout-exercise-create.php
 php -l public/workout-exercise-delete.php
+php -l public/workout-exercise-move.php
 ```
 
 The `-l` option checks syntax without executing the code.
