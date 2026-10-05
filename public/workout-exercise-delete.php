@@ -1,10 +1,6 @@
 <?php
 
-session_start();
-
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
+require_once __DIR__ . '/../src/bootstrap.php';
 
 $workoutExercise = null;
 $errorMessage = null;
@@ -58,20 +54,11 @@ if ($workoutExerciseId === false) {
         $errorMessage = 'Unable to load workout exercise.';
     }
 }
-$csrfToken = $_SESSION['csrf_token'];
+$csrfToken = csrfToken();
 
 if ($errorMessage === null) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $csrfToken = $_POST['csrf_token'] ?? null;
-
-        if (
-                !is_string($csrfToken)
-                || !hash_equals($_SESSION['csrf_token'], $csrfToken)
-        ) {
-            http_response_code(403);
-            echo 'Invalid form submission.';
-            exit;
-        }
+        requireValidCsrfToken($_POST['csrf_token'] ?? null);
 
         try {
             $sql = "DELETE FROM workout_exercises WHERE id=:id";
@@ -88,58 +75,38 @@ if ($errorMessage === null) {
         }
     }
 }
-?>
 
-<!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport"
-                content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Remove exercise from workout</title>
-    </head>
-    <body>
+$pageTitle = 'Remove exercise from workout';
+require __DIR__ . '/../templates/header.php';
+?>
         <h1>Remove exercise from workout</h1>
         <?php
         if ($errorMessage !== null): ?>
-            <p><?= htmlspecialchars($errorMessage, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></p>
+            <p><?= e($errorMessage) ?></p>
         <?php
         else: ?>
             <?php
             if ($deleteErrorMessage !== null): ?>
-                <p><?= htmlspecialchars($deleteErrorMessage, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></p>
+                <p><?= e($deleteErrorMessage) ?></p>
             <?php
             endif; ?>
             <form action="workout-exercise-delete.php?id=<?= $workoutExerciseId ?>" method="post">
                 <input
                         type="hidden"
                         name="csrf_token"
-                        value="<?= htmlspecialchars($csrfToken, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
+                        value="<?= e($csrfToken) ?>"
                 >
 
                 <div class="input-container">
-                    <p><?= htmlspecialchars(
-                                $workoutExercise['exercise_name'],
-                                ENT_QUOTES | ENT_SUBSTITUTE,
-                                'UTF-8'
-                        ) ?></p>
+                    <p><?= e($workoutExercise['exercise_name']) ?></p>
                 </div>
 
                 <div class="input-container">
-                    <p><?= htmlspecialchars(
-                                $workoutExercise['workout_name'],
-                                ENT_QUOTES | ENT_SUBSTITUTE,
-                                'UTF-8'
-                        ) ?></p>
+                    <p><?= e($workoutExercise['workout_name']) ?></p>
                 </div>
 
                 <div class="input-container">
-                    <p><?= htmlspecialchars(
-                                $workoutExercise['workout_date'],
-                                ENT_QUOTES | ENT_SUBSTITUTE,
-                                'UTF-8'
-                        ) ?></p>
+                    <p><?= e($workoutExercise['workout_date']) ?></p>
                 </div>
                 <p>This will remove this exercise and its recorded sets from this workout. The exercise will remain in
                     the catalog and other workouts.</p>
@@ -149,5 +116,4 @@ if ($errorMessage === null) {
         <?php
         endif; ?>
         <a href="index.php">Back to workouts</a>
-    </body>
-</html>
+<?php require __DIR__ . '/../templates/footer.php'; ?>

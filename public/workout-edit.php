@@ -1,13 +1,7 @@
 <?php
 
-require_once __DIR__ . "/../src/workout-validation.php";
-
-session_start();
-date_default_timezone_set('Europe/Zagreb');
-
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
+require_once __DIR__ . '/../src/bootstrap.php';
+require_once __DIR__ . '/../src/workout-validation.php';
 
 $workout = null;
 $errorMessage = null;
@@ -47,18 +41,8 @@ if ($errorMessage === null) {
     $name = $workout['name'];
     $note = $workout['note'] ?? '';
 
-
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $csrfToken = $_POST['csrf_token'] ?? null;
-
-        if (
-                !is_string($csrfToken)
-                || !hash_equals($_SESSION['csrf_token'], $csrfToken)
-        ) {
-            http_response_code(403);
-            echo 'Invalid form submission.';
-            exit;
-        }
+        requireValidCsrfToken($_POST['csrf_token'] ?? null);
 
         $validation = validateWorkout($_POST);
         $date = $validation['date'];
@@ -86,37 +70,29 @@ if ($errorMessage === null) {
         }
     }
 }
-?>
 
-<!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport"
-                content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>GymLog Edit Workout</title>
-    </head>
-    <body>
+$pageTitle = 'GymLog Edit Workout';
+require __DIR__ . '/../templates/header.php';
+?>
         <?php
         if ($errorMessage !== null): ?>
-            <p><?= htmlspecialchars($errorMessage, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></p>
+            <p><?= e($errorMessage) ?></p>
         <?php
         else: ?>
             <?php
             if ($saveErrorMessage !== null): ?>
-                <p><?= htmlspecialchars($saveErrorMessage, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></p>
+                <p><?= e($saveErrorMessage) ?></p>
             <?php
             endif; ?>
             <?php
-            $csrfToken = $_SESSION['csrf_token'];
+            $csrfToken = csrfToken();
             $submitLabel = 'Save changes';
             $formAction = "workout-edit.php?id=$id";
+
             require __DIR__ . '/../templates/workout-form.php';
             ?>
             <a href="workout.php?id=<?= $workout['id'] ?>">Cancel</a>
         <?php
         endif; ?>
         <a href="index.php">Back to workouts</a>
-    </body>
-</html>
+<?php require __DIR__ . '/../templates/footer.php'; ?>

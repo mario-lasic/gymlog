@@ -1,9 +1,6 @@
 <?php
 
-session_start();
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
+require_once __DIR__ . '/../src/bootstrap.php';
 
 $errorMessage = null;
 $workout = null;
@@ -43,16 +40,7 @@ if ($errorMessage === null) {
     $date = $workout['workout_date'];
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $csrfToken = $_POST['csrf_token'] ?? null;
-
-        if (
-                !is_string($csrfToken)
-                || !hash_equals($_SESSION['csrf_token'], $csrfToken)
-        ) {
-            http_response_code(403);
-            echo 'Invalid form submission.';
-            exit;
-        }
+        requireValidCsrfToken($_POST['csrf_token'] ?? null);
 
         try {
             $sql = "DELETE FROM workouts WHERE id=:id";
@@ -69,43 +57,36 @@ if ($errorMessage === null) {
         }
     }
 }
-$csrfToken = $_SESSION['csrf_token'];
+$csrfToken = csrfToken();
 
+
+$pageTitle = 'Delete workout';
+require __DIR__ . '/../templates/header.php';
 ?>
-<!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport"
-                content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Delete workout</title>
-    </head>
-    <body>
         <h1>Delete workout</h1>
         <?php
         if ($errorMessage !== null): ?>
-            <p><?= htmlspecialchars($errorMessage, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></p>
+            <p><?= e($errorMessage) ?></p>
         <?php
         else: ?>
             <?php
             if ($deleteErrorMessage !== null): ?>
-                <p><?= htmlspecialchars($deleteErrorMessage, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></p>
+                <p><?= e($deleteErrorMessage) ?></p>
             <?php
             endif; ?>
             <form action="workout-delete.php?id=<?= $id ?>" method="post">
                 <input
                         type="hidden"
                         name="csrf_token"
-                        value="<?= htmlspecialchars($csrfToken, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
+                        value="<?= e($csrfToken) ?>"
                 >
 
                 <div class="input-container">
-                    <p><?= htmlspecialchars($date, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></p>
+                    <p><?= e($date) ?></p>
                 </div>
 
                 <div class="input-container">
-                    <p><?= htmlspecialchars($name, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></p>
+                    <p><?= e($name) ?></p>
                 </div>
                 <p>This will permanently delete this workout, its exercise entries, and all recorded sets. Exercises in
                     the
@@ -116,5 +97,4 @@ $csrfToken = $_SESSION['csrf_token'];
         <?php
         endif; ?>
         <a href="index.php">Back to workouts</a>
-    </body>
-</html>
+<?php require __DIR__ . '/../templates/footer.php'; ?>

@@ -7,20 +7,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-session_start();
+require_once __DIR__ . '/../src/bootstrap.php';
 
-$sessionToken = $_SESSION['csrf_token'] ?? null;
-$csrfToken = $_POST['csrf_token'] ?? null;
-
-if (
-    !is_string($sessionToken)
-    || !is_string($csrfToken)
-    || !hash_equals($sessionToken, $csrfToken)
-) {
-    http_response_code(403);
-    echo 'Invalid form submission.';
-    exit;
-}
+requireValidCsrfToken($_POST['csrf_token'] ?? null);
 
 $rawId = $_POST['workout_exercise_id'] ?? null;
 

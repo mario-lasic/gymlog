@@ -1,10 +1,6 @@
 <?php
 
-session_start();
-
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
+require_once __DIR__ . '/../src/bootstrap.php';
 
 $workout = null;
 $exercises = [];
@@ -59,16 +55,7 @@ if ($workoutId === false) {
 }
 
 if ($errorMessage === null && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $csrfToken = $_POST['csrf_token'] ?? null;
-
-    if (
-            !is_string($csrfToken)
-            || !hash_equals($_SESSION['csrf_token'], $csrfToken)
-    ) {
-        http_response_code(403);
-        echo 'Invalid form submission.';
-        exit;
-    }
+    requireValidCsrfToken($_POST['csrf_token'] ?? null);
 
     $rawExerciseId = $_POST['exercise_id'] ?? null;
 
@@ -151,37 +138,20 @@ if ($errorMessage === null && $_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+$pageTitle = 'GymLog Add Exercise to Workout';
+require __DIR__ . '/../templates/header.php';
 ?>
-<!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>GymLog Add Exercise to Workout</title>
-    </head>
-    <body>
         <h1>Add exercise to workout</h1>
 
         <?php
         if ($errorMessage !== null): ?>
-            <p><?= htmlspecialchars(
-                        $errorMessage,
-                        ENT_QUOTES | ENT_SUBSTITUTE,
-                        'UTF-8'
-                ) ?></p>
+            <p><?= e($errorMessage) ?></p>
         <?php
         else: ?>
-            <p><?= htmlspecialchars(
-                        $workout['name'],
-                        ENT_QUOTES | ENT_SUBSTITUTE,
-                        'UTF-8'
-                ) ?></p>
+            <p><?= e($workout['name']) ?></p>
 
-            <p><?= htmlspecialchars(
-                        $workout['workout_date'],
-                        ENT_QUOTES | ENT_SUBSTITUTE,
-                        'UTF-8'
-                ) ?></p>
+            <p><?= e($workout['workout_date']) ?></p>
 
             <?php
             if (empty($exercises)): ?>
@@ -190,17 +160,13 @@ if ($errorMessage === null && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <?php
                 if (isset($errors['exercise_id'])): ?>
-                    <p><?= htmlspecialchars(
-                                $errors['exercise_id'],
-                                ENT_QUOTES | ENT_SUBSTITUTE,
-                                'UTF-8'
-                        ) ?></p>
+                    <p><?= e($errors['exercise_id']) ?></p>
                 <?php
                 endif; ?>
             <?php
             else: ?>
                 <?php if($saveErrorMessage !== null): ?>
-                    <p><?= htmlspecialchars($saveErrorMessage, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></p>
+                    <p><?= e($saveErrorMessage) ?></p>
                 <?php endif; ?>
                 <form
                         action="workout-exercise-create.php?workout_id=<?= $workoutId ?>"
@@ -209,11 +175,7 @@ if ($errorMessage === null && $_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input
                             type="hidden"
                             name="csrf_token"
-                            value="<?= htmlspecialchars(
-                                    $_SESSION['csrf_token'],
-                                    ENT_QUOTES | ENT_SUBSTITUTE,
-                                    'UTF-8'
-                            ) ?>"
+                            value="<?= e(csrfToken()) ?>"
                     >
 
                     <div class="input-container">
@@ -229,22 +191,14 @@ if ($errorMessage === null && $_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <?= (int)$exercise['id'] === $exerciseId
                                                 ? 'selected'
                                                 : '' ?>
-                                ><?= htmlspecialchars(
-                                            $exercise['name'],
-                                            ENT_QUOTES | ENT_SUBSTITUTE,
-                                            'UTF-8'
-                                    ) ?></option>
+                                ><?= e($exercise['name']) ?></option>
                             <?php
                             endforeach; ?>
                         </select>
 
                         <?php
                         if (isset($errors['exercise_id'])): ?>
-                            <p><?= htmlspecialchars(
-                                        $errors['exercise_id'],
-                                        ENT_QUOTES | ENT_SUBSTITUTE,
-                                        'UTF-8'
-                                ) ?></p>
+                            <p><?= e($errors['exercise_id']) ?></p>
                         <?php
                         endif; ?>
                     </div>
@@ -259,5 +213,4 @@ if ($errorMessage === null && $_SERVER['REQUEST_METHOD'] === 'POST') {
         endif; ?>
 
         <a href="index.php">Back to workouts</a>
-    </body>
-</html>
+<?php require __DIR__ . '/../templates/footer.php'; ?>

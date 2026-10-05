@@ -500,7 +500,14 @@ Potvrđeni su uređivanje, spremanje nepromijenjenih vrijednosti i 0 kg, odbijan
 tokena, potvrda i odustajanje od brisanja, brisanje samo odabrane serije, statusi 400/404 te stvaranje serija nakon
 izdvajanja validacije.
 
+### Refaktoriranje zajedničkih dijelova
+
+Pokretanje sesije, vremenska zona, CSRF obrada i HTML escaping izdvojeni su u zajedničke datoteke. HTML stranice koriste
+zajedničko zaglavlje, navigaciju i podnožje.
+
+Refaktoriranje nije promijenilo strukturu baze ni postojeće SQL upite. Potvrđeni su sintaksa svih PHP datoteka, HTTP
+odgovori i zaštita obrazaca te povezani radni tijek u pregledniku.
+
 ### Sljedeća cjelina
 
-Slijedi uklanjanje ponavljajuće CSRF obrade i HTML escaping koda te izdvajanje zajedničkih dijelova stranica. Nakon toga
-uređujemo izgled za računalo i mobitel.
+Slijedi jednostavno CSS uređenje stranica, obrazaca i tablica za računalo i mobitel.

@@ -1,12 +1,8 @@
 <?php
 
-session_start();
+require_once __DIR__ . '/../src/bootstrap.php';
 
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-
-$csrfToken = $_SESSION['csrf_token'];
+$csrfToken = csrfToken();
 
 $workout = null;
 $errorMessage = null;
@@ -116,35 +112,18 @@ if ($id === false) {
         }
     }
 }
+
+$pageTitle = 'GymLog Workout';
+require __DIR__ . '/../templates/header.php';
 ?>
-<!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>GymLog Workout</title>
-    </head>
-    <body>
         <?php
         if ($errorMessage !== null): ?>
-            <p><?= htmlspecialchars(
-                        $errorMessage,
-                        ENT_QUOTES | ENT_SUBSTITUTE,
-                        'UTF-8'
-                ) ?></p>
+            <p><?= e($errorMessage) ?></p>
         <?php
         else: ?>
-            <h1><?= htmlspecialchars(
-                        $workout['name'],
-                        ENT_QUOTES | ENT_SUBSTITUTE,
-                        'UTF-8'
-                ) ?></h1>
+            <h1><?= e($workout['name']) ?></h1>
 
-            <p><?= htmlspecialchars(
-                        $workout['workout_date'],
-                        ENT_QUOTES | ENT_SUBSTITUTE,
-                        'UTF-8'
-                ) ?></p>
+            <p><?= e($workout['workout_date']) ?></p>
 
             <?php
             if ($workout['note'] === null || $workout['note'] === ''): ?>
@@ -152,11 +131,7 @@ if ($id === false) {
             <?php
             else: ?>
                 <p><?= nl2br(
-                            htmlspecialchars(
-                                    $workout['note'],
-                                    ENT_QUOTES | ENT_SUBSTITUTE,
-                                    'UTF-8'
-                            )
+                            e($workout['note'])
                     ) ?></p>
             <?php
             endif; ?>
@@ -191,11 +166,7 @@ if ($id === false) {
                             <tr>
                                 <td><?= (int)$workoutExercise['position'] ?></td>
 
-                                <td><?= htmlspecialchars(
-                                            $workoutExercise['name'],
-                                            ENT_QUOTES | ENT_SUBSTITUTE,
-                                            'UTF-8'
-                                    ) ?></td>
+                                <td><?= e($workoutExercise['name']) ?></td>
 
                                 <td>
                                     <?php
@@ -218,11 +189,7 @@ if ($id === false) {
                                                     <tr>
                                                         <td><?= (int)$set['set_number'] ?></td>
                                                         <td><?= (int)$set['reps'] ?></td>
-                                                        <td><?= htmlspecialchars(
-                                                                    $set['weight_kg'],
-                                                                    ENT_QUOTES | ENT_SUBSTITUTE,
-                                                                    'UTF-8'
-                                                            ) ?></td>
+                                                        <td><?= e($set['weight_kg']) ?></td>
                                                         <td>
                                                             <a href="set-edit.php?id=<?= (int) $set['id'] ?>">Edit</a>
                                                             <a href="set-delete.php?id=<?= (int) $set['id'] ?>">Delete</a>
@@ -245,11 +212,7 @@ if ($id === false) {
                                         <input
                                                 type="hidden"
                                                 name="csrf_token"
-                                                value="<?= htmlspecialchars(
-                                                        $csrfToken,
-                                                        ENT_QUOTES | ENT_SUBSTITUTE,
-                                                        'UTF-8'
-                                                ) ?>"
+                                                value="<?= e($csrfToken) ?>"
                                         >
 
                                         <input
@@ -288,5 +251,4 @@ if ($id === false) {
         endif; ?>
 
         <a href="index.php">Back to workouts</a>
-    </body>
-</html>
+<?php require __DIR__ . '/../templates/footer.php'; ?>

@@ -1,11 +1,7 @@
 <?php
+
+require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/set-validation.php';
-
-session_start();
-
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
 
 $workoutExercise = null;
 $errorMessage = null;
@@ -65,16 +61,7 @@ if ($workoutExerciseId === false) {
 }
 
 if ($errorMessage === null && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $csrfToken = $_POST['csrf_token'] ?? null;
-
-    if (
-            !is_string($csrfToken)
-            || !hash_equals($_SESSION['csrf_token'], $csrfToken)
-    ) {
-        http_response_code(403);
-        echo 'Invalid form submission.';
-        exit;
-    }
+    requireValidCsrfToken($_POST['csrf_token'] ?? null);
 
     $validation = validateSet($_POST);
     $reps = $validation['reps'];
@@ -86,7 +73,6 @@ if ($errorMessage === null && $_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo->beginTransaction();
 
-            // Zaključavamo vezu prije dodjele broja serije.
             $sql = '
                 SELECT id
                 FROM workout_exercises
@@ -170,52 +156,27 @@ if ($errorMessage === null && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$csrfToken = $_SESSION['csrf_token'];
+$csrfToken = csrfToken();
+
+$pageTitle = 'GymLog Add Set';
+require __DIR__ . '/../templates/header.php';
 ?>
-<!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>GymLog Add Set</title>
-    </head>
-    <body>
         <h1>Add set</h1>
 
         <?php
         if ($errorMessage !== null): ?>
-            <p><?= htmlspecialchars(
-                        $errorMessage,
-                        ENT_QUOTES | ENT_SUBSTITUTE,
-                        'UTF-8'
-                ) ?></p>
+            <p><?= e($errorMessage) ?></p>
         <?php
         else: ?>
-            <h2><?= htmlspecialchars(
-                        $workoutExercise['exercise_name'],
-                        ENT_QUOTES | ENT_SUBSTITUTE,
-                        'UTF-8'
-                ) ?></h2>
+            <h2><?= e($workoutExercise['exercise_name']) ?></h2>
 
-            <p><?= htmlspecialchars(
-                        $workoutExercise['workout_name'],
-                        ENT_QUOTES | ENT_SUBSTITUTE,
-                        'UTF-8'
-                ) ?></p>
+            <p><?= e($workoutExercise['workout_name']) ?></p>
 
-            <p><?= htmlspecialchars(
-                        $workoutExercise['workout_date'],
-                        ENT_QUOTES | ENT_SUBSTITUTE,
-                        'UTF-8'
-                ) ?></p>
+            <p><?= e($workoutExercise['workout_date']) ?></p>
 
             <?php
             if ($saveErrorMessage !== null): ?>
-                <p><?= htmlspecialchars(
-                            $saveErrorMessage,
-                            ENT_QUOTES | ENT_SUBSTITUTE,
-                            'UTF-8'
-                    ) ?></p>
+                <p><?= e($saveErrorMessage) ?></p>
             <?php
             endif; ?>
 
@@ -226,11 +187,7 @@ $csrfToken = $_SESSION['csrf_token'];
                 <input
                         type="hidden"
                         name="csrf_token"
-                        value="<?= htmlspecialchars(
-                                $csrfToken,
-                                ENT_QUOTES | ENT_SUBSTITUTE,
-                                'UTF-8'
-                        ) ?>"
+                        value="<?= e($csrfToken) ?>"
                 >
 
                 <div class="input-container">
@@ -242,21 +199,13 @@ $csrfToken = $_SESSION['csrf_token'];
                             min="1"
                             max="65535"
                             step="1"
-                            value="<?= htmlspecialchars(
-                                    $reps,
-                                    ENT_QUOTES | ENT_SUBSTITUTE,
-                                    'UTF-8'
-                            ) ?>"
+                            value="<?= e($reps) ?>"
                             required
                     >
 
                     <?php
                     if (isset($errors['reps'])): ?>
-                        <p><?= htmlspecialchars(
-                                    $errors['reps'],
-                                    ENT_QUOTES | ENT_SUBSTITUTE,
-                                    'UTF-8'
-                            ) ?></p>
+                        <p><?= e($errors['reps']) ?></p>
                     <?php
                     endif; ?>
                 </div>
@@ -270,21 +219,13 @@ $csrfToken = $_SESSION['csrf_token'];
                             min="0"
                             max="9999.99"
                             step="0.01"
-                            value="<?= htmlspecialchars(
-                                    $weightKg,
-                                    ENT_QUOTES | ENT_SUBSTITUTE,
-                                    'UTF-8'
-                            ) ?>"
+                            value="<?= e($weightKg) ?>"
                             required
                     >
 
                     <?php
                     if (isset($errors['weight_kg'])): ?>
-                        <p><?= htmlspecialchars(
-                                    $errors['weight_kg'],
-                                    ENT_QUOTES | ENT_SUBSTITUTE,
-                                    'UTF-8'
-                            ) ?></p>
+                        <p><?= e($errors['weight_kg']) ?></p>
                     <?php
                     endif; ?>
                 </div>
@@ -299,5 +240,4 @@ $csrfToken = $_SESSION['csrf_token'];
         endif; ?>
 
         <a href="index.php">Back to workouts</a>
-    </body>
-</html>
+<?php require __DIR__ . '/../templates/footer.php'; ?>

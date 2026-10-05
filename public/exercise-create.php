@@ -1,26 +1,13 @@
 <?php
 
-session_start();
-
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
+require_once __DIR__ . '/../src/bootstrap.php';
 
 $name = '';
 $errors = [];
 $errorMessage = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $csrfToken = $_POST['csrf_token'] ?? null;
-
-    if (
-            !is_string($csrfToken)
-            || !hash_equals($_SESSION['csrf_token'], $csrfToken)
-    ) {
-        http_response_code(403);
-        echo 'Invalid form submission.';
-        exit;
-    }
+    requireValidCsrfToken($_POST['csrf_token'] ?? null);
 
     $rawName = $_POST['name'] ?? null;
 
@@ -57,28 +44,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-?>
 
-<!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport"
-                content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>GymLog New Exercise</title>
-    </head>
-    <body>
+$pageTitle = 'GymLog New Exercise';
+require __DIR__ . '/../templates/header.php';
+?>
         <?php
         if ($errorMessage !== null): ?>
-            <p><?= htmlspecialchars($errorMessage, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></p>
+            <p><?= e($errorMessage) ?></p>
         <?php
         endif; ?>
         <form action="exercise-create.php" method="post">
             <input
                     type="hidden"
                     name="csrf_token"
-                    value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
+                    value="<?= e(csrfToken()) ?>"
             >
             <div class="input-container">
                 <label for="name">Name</label>
@@ -86,18 +65,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         type="text"
                         id="name"
                         name="name"
-                        value="<?= htmlspecialchars($name, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
+                        value="<?= e($name) ?>"
                         maxlength="100"
                         required
                 >
                 <?php
                 if (isset($errors['name'])): ?>
-                    <p><?= htmlspecialchars($errors['name'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></p>
+                    <p><?= e($errors['name']) ?></p>
                 <?php
                 endif; ?>
             </div>
             <button type="submit">Create Exercise</button>
         </form>
         <a href="exercises.php">Back to exercises</a>
-    </body>
-</html>
+<?php require __DIR__ . '/../templates/footer.php'; ?>

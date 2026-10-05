@@ -1,10 +1,6 @@
 <?php
 
-session_start();
-
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
+require_once __DIR__ . '/../src/bootstrap.php';
 
 $set = null;
 $errorMessage = null;
@@ -61,16 +57,7 @@ if ($setId === false) {
 }
 
 if ($errorMessage === null && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $submittedToken = $_POST['csrf_token'] ?? null;
-
-    if (
-        !is_string($submittedToken)
-        || !hash_equals($_SESSION['csrf_token'], $submittedToken)
-    ) {
-        http_response_code(403);
-        echo 'Invalid form submission.';
-        exit;
-    }
+    requireValidCsrfToken($_POST['csrf_token'] ?? null);
 
     try {
         $stmt = $pdo->prepare('DELETE FROM sets WHERE id = :id');
@@ -89,72 +76,39 @@ if ($errorMessage === null && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$csrfToken = $_SESSION['csrf_token'];
+$csrfToken = csrfToken();
+
+$pageTitle = 'GymLog Delete Set';
+require __DIR__ . '/../templates/header.php';
 ?>
-<!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>GymLog Delete Set</title>
-    </head>
-    <body>
         <h1>Delete set</h1>
 
         <?php if ($errorMessage !== null): ?>
-            <p><?= htmlspecialchars(
-                $errorMessage,
-                ENT_QUOTES | ENT_SUBSTITUTE,
-                'UTF-8'
-            ) ?></p>
+            <p><?= e($errorMessage) ?></p>
         <?php else: ?>
-            <h2><?= htmlspecialchars(
-                $set['exercise_name'],
-                ENT_QUOTES | ENT_SUBSTITUTE,
-                'UTF-8'
-            ) ?></h2>
+            <h2><?= e($set['exercise_name']) ?></h2>
 
-            <p><?= htmlspecialchars(
-                $set['workout_name'],
-                ENT_QUOTES | ENT_SUBSTITUTE,
-                'UTF-8'
-            ) ?></p>
+            <p><?= e($set['workout_name']) ?></p>
 
-            <p><?= htmlspecialchars(
-                $set['workout_date'],
-                ENT_QUOTES | ENT_SUBSTITUTE,
-                'UTF-8'
-            ) ?></p>
+            <p><?= e($set['workout_date']) ?></p>
 
             <p>
                 Set <?= (int) $set['set_number'] ?>:
                 <?= (int) $set['reps'] ?> reps ×
-                <?= htmlspecialchars(
-                    $set['weight_kg'],
-                    ENT_QUOTES | ENT_SUBSTITUTE,
-                    'UTF-8'
-                ) ?> kg
+                <?= e($set['weight_kg']) ?> kg
             </p>
 
             <p>This will permanently delete only this set.</p>
 
             <?php if ($deleteErrorMessage !== null): ?>
-                <p><?= htmlspecialchars(
-                    $deleteErrorMessage,
-                    ENT_QUOTES | ENT_SUBSTITUTE,
-                    'UTF-8'
-                ) ?></p>
+                <p><?= e($deleteErrorMessage) ?></p>
             <?php endif; ?>
 
             <form action="set-delete.php?id=<?= $setId ?>" method="post">
                 <input
                     type="hidden"
                     name="csrf_token"
-                    value="<?= htmlspecialchars(
-                        $csrfToken,
-                        ENT_QUOTES | ENT_SUBSTITUTE,
-                        'UTF-8'
-                    ) ?>"
+                    value="<?= e($csrfToken) ?>"
                 >
 
                 <button type="submit">Delete set</button>
@@ -164,5 +118,4 @@ $csrfToken = $_SESSION['csrf_token'];
         <?php endif; ?>
 
         <a href="index.php">Back to workouts</a>
-    </body>
-</html>
+<?php require __DIR__ . '/../templates/footer.php'; ?>

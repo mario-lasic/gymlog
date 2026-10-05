@@ -52,9 +52,14 @@ lock on the parent workout exercise.
 Workout details display each exercise's sets in set-number order, including an empty-state message. Individual sets can
 be edited or deleted through a confirmation page.
 
-Set creation and editing share server-side validation in `src/set-validation.php`. Editing preserves the set's ID,
-number, and exercise association. Deleting removes only the selected set and preserves the remaining set numbers. Both
-operations require POST requests with valid CSRF tokens and redirect to the related workout after success.
+Workout creation and editing share validation in `src/workout-validation.php` and a form template in
+`templates/workout-form.php`. Set creation and editing share validation in `src/set-validation.php`.
+
+All pages load `src/bootstrap.php` for session initialization, the application time zone, and shared helpers. CSRF token
+generation and verification are centralized in `src/csrf.php`. The `e()` helper provides consistent HTML escaping.
+
+HTML pages share a header, navigation, and footer through `templates/header.php` and `templates/footer.php`. Each page
+retains its own request handling, database operations, and redirects.
 
 ## Technologies and requirements
 
@@ -124,6 +129,11 @@ php -l public/set-create.php
 php -l public/set-validation.php
 php -l public/set-edit.php
 php -l public/set-delete.php
+php -l src/bootstrap.php
+php -l src/helpers.php
+php -l src/csrf.php
+php -l templates/header.php
+php -l templates/footer.php
 ```
 
 The `-l` option checks syntax without executing the code.
