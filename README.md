@@ -49,8 +49,12 @@ Sets can be recorded for individual exercises within a workout, with repetitions
 validated on the server and protected with CSRF tokens. Set numbers are assigned automatically using a transaction and a
 lock on the parent workout exercise.
 
-Workout details display each exercise's sets in set-number order, including an empty-state message. Editing and deleting
-individual sets are not implemented yet.
+Workout details display each exercise's sets in set-number order, including an empty-state message. Individual sets can
+be edited or deleted through a confirmation page.
+
+Set creation and editing share server-side validation in `src/set-validation.php`. Editing preserves the set's ID,
+number, and exercise association. Deleting removes only the selected set and preserves the remaining set numbers. Both
+operations require POST requests with valid CSRF tokens and redirect to the related workout after success.
 
 ## Technologies and requirements
 
@@ -117,6 +121,9 @@ php -l public/workout-exercise-create.php
 php -l public/workout-exercise-delete.php
 php -l public/workout-exercise-move.php
 php -l public/set-create.php
+php -l public/set-validation.php
+php -l public/set-edit.php
+php -l public/set-delete.php
 ```
 
 The `-l` option checks syntax without executing the code.
@@ -169,6 +176,14 @@ Manual checks completed:
 - Refreshing after successful submission does not create another set.
 - Sets appear under the correct exercise and workout, ordered by set number.
 - Exercises without sets display No sets yet.
+- Editing a set updates repetitions and weight while preserving its ID and set number.
+- Saving unchanged values and a weight of 0 kg succeeds.
+- Invalid edit input preserves entered values without changing the database.
+- Altered CSRF tokens prevent both editing and deletion.
+- Opening or cancelling the deletion confirmation leaves the set unchanged.
+- Deleting a set preserves other sets and the workout exercise.
+- Invalid set IDs return HTTP 400; nonexistent set IDs return HTTP 404.
+- Set creation still works after extracting shared validation.
 
 Sorting multiple workouts, including workouts with the same date, and additional field-length boundary checks remain to
 be tested.

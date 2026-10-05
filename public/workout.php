@@ -209,6 +209,7 @@ if ($id === false) {
                                                     <th scope="col">Set</th>
                                                     <th scope="col">Reps</th>
                                                     <th scope="col">Weight (kg)</th>
+                                                    <th scope="col">Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -222,6 +223,10 @@ if ($id === false) {
                                                                     ENT_QUOTES | ENT_SUBSTITUTE,
                                                                     'UTF-8'
                                                             ) ?></td>
+                                                        <td>
+                                                            <a href="set-edit.php?id=<?= (int) $set['id'] ?>">Edit</a>
+                                                            <a href="set-delete.php?id=<?= (int) $set['id'] ?>">Delete</a>
+                                                        </td>
                                                     </tr>
                                                 <?php
                                                 endforeach; ?>

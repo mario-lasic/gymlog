@@ -1,4 +1,5 @@
 <?php
+
 require_once __DIR__ . '/../src/set-validation.php';
 
 session_start();
@@ -7,165 +8,113 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-$workoutExercise = null;
+$set = null;
 $errorMessage = null;
 $saveErrorMessage = null;
 $errors = [];
-
 $reps = '';
 $weightKg = '';
-$repsValue = false;
 
-$rawId = $_GET['workout_exercise_id'] ?? null;
+$rawId = $_GET['id'] ?? null;
 
-$workoutExerciseId = is_string($rawId)
+$setId = is_string($rawId)
         ? filter_var($rawId, FILTER_VALIDATE_INT, [
                 'options' => ['min_range' => 1],
         ])
         : false;
 
-if ($workoutExerciseId === false) {
+if ($setId === false) {
     http_response_code(400);
-    $errorMessage = 'Invalid workout exercise ID.';
+    $errorMessage = 'Invalid set ID.';
 } else {
     try {
         $pdo = require __DIR__ . '/../src/database.php';
 
         $sql = '
             SELECT
-                we.id AS workout_exercise_id,
+                s.id,
+                s.set_number,
+                s.reps,
+                s.weight_kg,
                 we.workout_id,
                 e.name AS exercise_name,
                 w.name AS workout_name,
                 w.workout_date
-            FROM workout_exercises AS we
-            INNER JOIN workouts AS w
-                ON w.id = we.workout_id
+            FROM sets AS s
+            INNER JOIN workout_exercises AS we
+                ON s.workout_exercise_id = we.id
             INNER JOIN exercises AS e
-                ON e.id = we.exercise_id
-            WHERE we.id = :id
+                ON we.exercise_id = e.id
+            INNER JOIN workouts AS w
+                ON we.workout_id = w.id
+            WHERE s.id = :id
         ';
 
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-                ':id' => $workoutExerciseId,
-        ]);
+        $stmt->execute([':id' => $setId]);
+        $set = $stmt->fetch();
 
-        $workoutExercise = $stmt->fetch();
-
-        if ($workoutExercise === false) {
+        if ($set === false) {
             http_response_code(404);
-            $errorMessage = 'Workout exercise not found.';
+            $errorMessage = 'Set not found.';
         }
     } catch (PDOException $e) {
         http_response_code(500);
         error_log('Database error: ' . $e->getMessage());
-        $errorMessage = 'Unable to load workout exercise.';
+        $errorMessage = 'Unable to load set.';
     }
 }
 
-if ($errorMessage === null && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $csrfToken = $_POST['csrf_token'] ?? null;
+if ($errorMessage === null) {
+    $reps = (string)$set['reps'];
+    $weightKg = (string)$set['weight_kg'];
 
-    if (
-            !is_string($csrfToken)
-            || !hash_equals($_SESSION['csrf_token'], $csrfToken)
-    ) {
-        http_response_code(403);
-        echo 'Invalid form submission.';
-        exit;
-    }
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $submittedToken = $_POST['csrf_token'] ?? null;
 
-    $validation = validateSet($_POST);
-    $reps = $validation['reps'];
-    $repsValue = $validation['reps_value'];
-    $weightKg = $validation['weight_kg'];
-    $errors = $validation['errors'];
+        if (
+                !is_string($submittedToken)
+                || !hash_equals($_SESSION['csrf_token'], $submittedToken)
+        ) {
+            http_response_code(403);
+            echo 'Invalid form submission.';
+            exit;
+        }
 
-    if (empty($errors)) {
-        try {
-            $pdo->beginTransaction();
+        $validation = validateSet($_POST);
+        $reps = $validation['reps'];
+        $repsValue = $validation['reps_value'];
+        $weightKg = $validation['weight_kg'];
+        $errors = $validation['errors'];
 
-            // Zaključavamo vezu prije dodjele broja serije.
-            $sql = '
-                SELECT id
-                FROM workout_exercises
-                WHERE id = :id
-                FOR UPDATE
-            ';
-
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([
-                    ':id' => $workoutExerciseId,
-            ]);
-
-            $lockedId = $stmt->fetchColumn();
-
-            if ($lockedId === false) {
-                $pdo->rollBack();
-
-                http_response_code(404);
-                $errorMessage = 'Workout exercise not found.';
-            } else {
+        if (empty($errors)) {
+            try {
                 $sql = '
-                    SELECT COALESCE(MAX(set_number), 0)
-                    FROM sets
-                    WHERE workout_exercise_id = :workout_exercise_id
+                    UPDATE sets
+                    SET
+                        reps = :reps,
+                        weight_kg = :weight_kg
+                    WHERE id = :id
                 ';
 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([
-                        ':workout_exercise_id' => $workoutExerciseId,
+                        ':reps' => $repsValue,
+                        ':weight_kg' => $weightKg,
+                        ':id' => $setId,
                 ]);
 
-                $nextSetNumber = (int)$stmt->fetchColumn() + 1;
-
-                if ($nextSetNumber > 65535) {
-                    $pdo->rollBack();
-                    $saveErrorMessage = 'Maximum number of sets reached.';
-                } else {
-                    $sql = '
-                        INSERT INTO sets (
-                            workout_exercise_id,
-                            set_number,
-                            reps,
-                            weight_kg
-                        )
-                        VALUES (
-                            :workout_exercise_id,
-                            :set_number,
-                            :reps,
-                            :weight_kg
-                        )
-                    ';
-
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->execute([
-                            ':workout_exercise_id' => $workoutExerciseId,
-                            ':set_number' => $nextSetNumber,
-                            ':reps' => $repsValue,
-                            ':weight_kg' => $weightKg,
-                    ]);
-
-                    $pdo->commit();
-
-                    header(
-                            'Location: workout.php?id='
-                            . (int)$workoutExercise['workout_id'],
-                            true,
-                            303
-                    );
-                    exit;
-                }
+                header(
+                        'Location: workout.php?id=' . (int)$set['workout_id'],
+                        true,
+                        303
+                );
+                exit;
+            } catch (PDOException $e) {
+                http_response_code(500);
+                error_log('Database error: ' . $e->getMessage());
+                $saveErrorMessage = 'Unable to save set.';
             }
-        } catch (PDOException $e) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
-
-            http_response_code(500);
-            error_log('Database error: ' . $e->getMessage());
-            $saveErrorMessage = 'Unable to save set.';
         }
     }
 }
@@ -177,10 +126,10 @@ $csrfToken = $_SESSION['csrf_token'];
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>GymLog Add Set</title>
+        <title>GymLog Edit Set</title>
     </head>
     <body>
-        <h1>Add set</h1>
+        <h1>Edit set</h1>
 
         <?php
         if ($errorMessage !== null): ?>
@@ -192,22 +141,24 @@ $csrfToken = $_SESSION['csrf_token'];
         <?php
         else: ?>
             <h2><?= htmlspecialchars(
-                        $workoutExercise['exercise_name'],
+                        $set['exercise_name'],
                         ENT_QUOTES | ENT_SUBSTITUTE,
                         'UTF-8'
                 ) ?></h2>
 
             <p><?= htmlspecialchars(
-                        $workoutExercise['workout_name'],
+                        $set['workout_name'],
                         ENT_QUOTES | ENT_SUBSTITUTE,
                         'UTF-8'
                 ) ?></p>
 
             <p><?= htmlspecialchars(
-                        $workoutExercise['workout_date'],
+                        $set['workout_date'],
                         ENT_QUOTES | ENT_SUBSTITUTE,
                         'UTF-8'
                 ) ?></p>
+
+            <p>Set <?= (int)$set['set_number'] ?></p>
 
             <?php
             if ($saveErrorMessage !== null): ?>
@@ -219,10 +170,7 @@ $csrfToken = $_SESSION['csrf_token'];
             <?php
             endif; ?>
 
-            <form
-                    action="set-create.php?workout_exercise_id=<?= $workoutExerciseId ?>"
-                    method="post"
-            >
+            <form action="set-edit.php?id=<?= $setId ?>" method="post">
                 <input
                         type="hidden"
                         name="csrf_token"
@@ -289,12 +237,10 @@ $csrfToken = $_SESSION['csrf_token'];
                     endif; ?>
                 </div>
 
-                <button type="submit">Save set</button>
+                <button type="submit">Save changes</button>
             </form>
 
-            <a href="workout.php?id=<?= (int)$workoutExercise['workout_id'] ?>">
-                Cancel
-            </a>
+            <a href="workout.php?id=<?= (int)$set['workout_id'] ?>">Cancel</a>
         <?php
         endif; ?>
 

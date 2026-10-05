@@ -482,6 +482,25 @@ po vježbi i treningu, prazno stanje te osvježavanje bez ponovnog unosa.
 Namjerno izazvan rollback, istodobni zahtjevi, dosezanje maksimalnog broja serija i kaskadno brisanje serija još nisu
 zasebno provjereni.
 
+### Uređivanje i brisanje serija
+
+Stvaranje i uređivanje serija koriste zajedničku funkciju `validateSet` u `src/set-validation.php`. Ponavljanja moraju
+biti cijeli broj od 1 do 65535, a težina decimalni zapis od 0 do 9999.99 s najviše dvije decimale.
+
+Uređivanje mijenja samo ponavljanja i težinu odabrane serije. ID, broj serije i pripadnost vježbi ostaju nepromijenjeni.
+Nevaljan unos prikazuje pogreške i zadržava unesene vrijednosti.
+
+Brisanje zahtijeva potvrdu putem obrasca. Pripremljeni DELETE upit uklanja samo odabranu seriju; preostale serije i
+roditeljska veza ostaju sačuvane. Brojevi preostalih serija ne mijenjaju se, pa su praznine dopuštene.
+
+Obje operacije izvršavaju se POST zahtjevom uz provjeru CSRF tokena. Nakon uspjeha slijedi HTTP 303 preusmjeravanje na
+pripadajući trening.
+
+Potvrđeni su uređivanje, spremanje nepromijenjenih vrijednosti i 0 kg, odbijanje nevaljanog unosa i izmijenjenog CSRF
+tokena, potvrda i odustajanje od brisanja, brisanje samo odabrane serije, statusi 400/404 te stvaranje serija nakon
+izdvajanja validacije.
+
 ### Sljedeća cjelina
 
-Slijedi uređivanje ponavljanja i težine pojedinačne serije uz validaciju i CSRF zaštitu.
+Slijedi uklanjanje ponavljajuće CSRF obrade i HTML escaping koda te izdvajanje zajedničkih dijelova stranica. Nakon toga
+uređujemo izgled za računalo i mobitel.
