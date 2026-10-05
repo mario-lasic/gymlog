@@ -510,4 +510,5 @@ odgovori i zaštita obrazaca te povezani radni tijek u pregledniku.
 
 ### Sljedeća cjelina
 
-Slijedi jednostavno CSS uređenje stranica, obrazaca i tablica za računalo i mobitel.
+Osnovno CSS uređenje za računalo i mobitel završeno je. Slijede završne funkcionalne provjere, pregled ranije odgođenih
+provjera i dovršavanje dokumentacije prve lokalne verzije.

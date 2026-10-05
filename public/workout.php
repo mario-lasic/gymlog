@@ -143,6 +143,7 @@ require __DIR__ . '/../templates/header.php';
                 <p>No exercises added to this workout yet.</p>
             <?php
             else: ?>
+            <div class="table-scroll table-scroll--wide">
                 <table>
                     <thead>
                         <tr>
@@ -239,6 +240,7 @@ require __DIR__ . '/../templates/header.php';
                         endforeach; ?>
                     </tbody>
                 </table>
+            </div>
             <?php
             endif; ?>
 

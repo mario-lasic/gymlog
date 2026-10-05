@@ -29,6 +29,7 @@ require __DIR__ . '/../templates/header.php';
             <p>No workouts yet.</p>
         <?php
         else: ?>
+        <div class="table-scroll">
             <table>
                 <tr>
                     <th>Date</th>
@@ -43,6 +44,7 @@ require __DIR__ . '/../templates/header.php';
                 <?php
                 endforeach; ?>
             </table>
+        </div>
         <?php
         endif; ?>
         <a href="workout-create.php">Create Workout</a>

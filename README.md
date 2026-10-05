@@ -61,12 +61,15 @@ generation and verification are centralized in `src/csrf.php`. The `e()` helper 
 HTML pages share a header, navigation, and footer through `templates/header.php` and `templates/footer.php`. Each page
 retains its own request handling, database operations, and redirects.
 
+The interface uses plain CSS with responsive navigation, styled forms, visible keyboard focus, and distinct destructive
+actions. Wide workout tables scroll horizontally within their container on smaller screens.
+
 ## Technologies and requirements
 
 - PHP with the PDO MySQL extension.
 - mbstring
 - MySQL.
-- HTML; CSS styling is planned.
+- HTML and CSS.
 - A web browser.
 
 Development has been verified with PHP 8.5.9 and MySQL 8.4.11. PhpStorm is the main development tool, and MySQL runs
@@ -194,6 +197,10 @@ Manual checks completed:
 - Deleting a set preserves other sets and the workout exercise.
 - Invalid set IDs return HTTP 400; nonexistent set IDs return HTTP 404.
 - Set creation still works after extracting shared validation.
+- Pages and forms display correctly on desktop and at a mobile viewport width of approximately 390 px.
+- Wide tables scroll within their container without widening the page.
+- Destructive buttons are visually distinct.
+- Keyboard navigation displays a visible focus outline.
 
 Sorting multiple workouts, including workouts with the same date, and additional field-length boundary checks remain to
 be tested.
