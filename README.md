@@ -45,7 +45,12 @@ database transaction and row locking. Moving beyond the first or last exercise l
 Manual checks confirmed movement in both directions, unchanged boundary positions, preserved entry IDs and row counts,
 and no changes to other workouts. No temporary position remains after a successful swap.
 
-Recording sets is not implemented yet.
+Sets can be recorded for individual exercises within a workout, with repetitions and weight in kilograms. Input is
+validated on the server and protected with CSRF tokens. Set numbers are assigned automatically using a transaction and a
+lock on the parent workout exercise.
+
+Workout details display each exercise's sets in set-number order, including an empty-state message. Editing and deleting
+individual sets are not implemented yet.
 
 ## Technologies and requirements
 
@@ -111,6 +116,7 @@ php -l public/exercise-create.php
 php -l public/workout-exercise-create.php
 php -l public/workout-exercise-delete.php
 php -l public/workout-exercise-move.php
+php -l public/set-create.php
 ```
 
 The `-l` option checks syntax without executing the code.
@@ -156,6 +162,13 @@ Manual checks completed:
 - The catalog exercise and its entry in another workout remain unchanged.
 - Remaining exercise positions are preserved.
 - Opening the removed entry's confirmation page returns HTTP 404.
+- Sets receive numbers 1 and 2 within one workout exercise; another exercise starts at 1.
+- Weights of 0 kg and 62.50 kg are saved and displayed correctly.
+- Invalid repetitions, negative weights, and weights with more than two decimal places are rejected.
+- An altered CSRF token prevents saving.
+- Refreshing after successful submission does not create another set.
+- Sets appear under the correct exercise and workout, ordered by set number.
+- Exercises without sets display No sets yet.
 
 Sorting multiple workouts, including workouts with the same date, and additional field-length boundary checks remain to
 be tested.

@@ -461,6 +461,27 @@ očuvanje ID-eva i broja veza, nepromijenjeni drugi trening te izostanak privrem
 
 Namjerno izazvana pogreška usred zamjene i istodobni zahtjevi još nisu zasebno testirani.
 
+### Unos i prikaz serija
+
+Serija pripada konkretnom zapisu `workout_exercises`. Obrazac provjerava postojanje veze, CSRF token i unesene
+vrijednosti.
+
+Ponavljanja moraju biti cijeli broj od 1 do 65535. Težina mora biti decimalni zapis od 0 do 9999.99, s najviše dvije
+decimale. Težina se provjerava kao string prije spremanja kako baza ne bi neprimjetno zaokružila nevaljan unos.
+
+Spremanje koristi transakciju i SELECT FOR UPDATE nad roditeljskom vezom. Broj serije određuje se kao najveći postojeći
+broj uvećan za jedan. Nakon INSERT-a slijede commit i HTTP 303 preusmjeravanje na trening. Pri pogrešci aktivna
+transakcija poništava se, a obrazac zadržava unesene vrijednosti.
+
+Detalji treninga dohvaćaju sve njegove serije jednim JOIN upitom. Rezultati se grupiraju prema `workout_exercise_id` i
+prikazuju uz odgovarajuću vježbu, sortirano po broju serije.
+
+Potvrđeni su validacija i CSRF zaštita, brojevi serija po vježbi, spremanje i prikaz 0 kg i 62.50 kg, razdvajanje serija
+po vježbi i treningu, prazno stanje te osvježavanje bez ponovnog unosa.
+
+Namjerno izazvan rollback, istodobni zahtjevi, dosezanje maksimalnog broja serija i kaskadno brisanje serija još nisu
+zasebno provjereni.
+
 ### Sljedeća cjelina
 
-Slijedi unos serije za vježbu unutar treninga: broj ponavljanja i težina u kilogramima, uz validaciju i CSRF zaštitu.
+Slijedi uređivanje ponavljanja i težine pojedinačne serije uz validaciju i CSRF zaštitu.
