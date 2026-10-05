@@ -281,7 +281,7 @@ Konfiguracijski predložak nalazi se u `config/database.example.php`. Stvarni pr
 objekt.
 
 Početna stranica dohvaća treninge sortirane po datumu silazno, a zatim po ID-u silazno. Razlikuje pogrešku dohvaćanja,
-prazan popis i tablicu treninga. Vrijednosti se prije ispisa u HTML obrađuju funkcijom `htmlspecialchars()`.
+prazan popis i tablicu treninga. Vrijednosti se prije ispisa u HTML obrađuju zajedničkom funkcijom `e()`, koja koristi `htmlspecialchars()`.
 
 ### Stvaranje treninga
 
@@ -313,16 +313,15 @@ Ručno su potvrđeni:
 - odbijanje budućeg, nepostojećeg i prerano datiranog treninga;
 - generička poruka pri neuspjelom dohvaćanju ili spremanju zbog neispravne konfiguracije baze.
 
-### Preostale provjere
+### Opseg i preostale provjere
 
-Preostaju provjere sortiranja više treninga, uključujući treninge istog datuma, te dodatne provjere graničnih duljina
-polja.
+Granične duljine naziva treninga i bilješke provjerene su završnim automatiziranim provjerama, uključujući Unicode
+znakove. Validacija ponavljanja i težine implementirana je i provjerena. Valjani unosi i pojedinačno brisanje serija
+ranije su potvrđeni korisnikovim provjerama u pregledniku.
 
-Za tablicu `sets` ostaju odgođeni valjani unosi, provjera jedinstvenosti redoslijeda uz valjane roditeljske zapise te
-izolirano i kaskadno brisanje serija.
-
-Validacija ponavljanja i težine slijedi uz njihove obrasce. Sama pretvorba vrijednosti u SQL tip ne zamjenjuje provjeru
-izvornog unosa.
+U zasebnoj probnoj bazi još treba provjeriti sortiranje više treninga istog datuma, stvarno kaskadno brisanje serija,
+poništavanje transakcije nakon namjerno izazvane pogreške, istodobne zahtjeve i dosezanje najvećeg broja serije.
+Završni pregled potvrdio je postojanje odgovarajućih ograničenja u stvarnoj MySQL bazi, ali ne zamjenjuje ove provjere.
 
 ### Detalji treninga
 
@@ -508,7 +507,19 @@ zajedničko zaglavlje, navigaciju i podnožje.
 Refaktoriranje nije promijenilo strukturu baze ni postojeće SQL upite. Potvrđeni su sintaksa svih PHP datoteka, HTTP
 odgovori i zaštita obrazaca te povezani radni tijek u pregledniku.
 
-### Sljedeća cjelina
+### Završni pregled prve lokalne verzije — 2026-10-05
 
-Osnovno CSS uređenje za računalo i mobitel završeno je. Slijede završne funkcionalne provjere, pregled ranije odgođenih
-provjera i dovršavanje dokumentacije prve lokalne verzije.
+Prošle su provjere PHP sintakse, 52 provjere validacije i HTML ispisa, 100 HTTP provjera i provjera strukture baze te
+8 provjera prikaza u pregledniku na širinama 390 i 1280 px. Provjereni prikazi obuhvatili su početnu stranicu,
+katalog i obrasce stvaranja; popunjene tablice oslanjaju se na ranije korisnikove provjere.
+
+Struktura postojeće baze pregledana je isključivo čitajućim upitima. Sve četiri tablice koriste InnoDB i očekivanu
+kolaciju, a definirana CHECK, UNIQUE i FK ograničenja odgovaraju modelu. Kaskadno brisanje je konfigurirano; njegovo
+stvarno izvršavanje sa serijama nije ponovljeno u ovom završnom pregledu.
+
+HTTP provjere izvršene su na privremenoj kopiji aplikacije s MySQL vezama postavljenima na READ ONLY. Neuspjeli upis
+prikazuje generičku poruku uz HTTP 500. Ove provjere ne zamjenjuju uspješno spremanje i brisanje, koje je korisnik
+ranije potvrdio. Nisu rađene izmjene aplikacijskih podataka radi testiranja.
+
+Dogovorene funkcionalnosti prve lokalne verzije i osnovno mobilno uređenje implementirani su. Preostale provjere
+navedene su iznad. Prijava i zaštita pristupa pripadaju zasebnoj fazi prije javnog korištenja s osobnim podatcima.

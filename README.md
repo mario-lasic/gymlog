@@ -22,10 +22,6 @@ Existing workouts can be edited through a prefilled form. Updates use server-sid
 prepared statement. Validation errors preserve entered values, and successful updates redirect to the same workout's
 details page.
 
-Workout creation and editing share validation in `src/workout-validation.php` and an HTML form template in
-`templates/workout-form.php`. Each page retains its own request handling, CSRF checks, database operations, and
-redirects.
-
 Workouts can be deleted through a confirmation page. Deletion requires a POST request and a valid CSRF token. Successful
 deletion redirects to the workout list.
 
@@ -102,8 +98,6 @@ php -S 127.0.0.1:8000 -t public
 - `-t public` sets the public document root.
 
 Open [GymLog locally](http://127.0.0.1:8000/). An empty database displays **No workouts yet**.
-Displaying populated rows, checking their order, and verifying special-character escaping remain to be tested with
-workout data.
 
 Keep the terminal open while using the application. Press **Ctrl+C** to stop the server. This server is intended for
 local development.
@@ -129,7 +123,7 @@ php -l public/workout-exercise-create.php
 php -l public/workout-exercise-delete.php
 php -l public/workout-exercise-move.php
 php -l public/set-create.php
-php -l public/set-validation.php
+php -l src/set-validation.php
 php -l public/set-edit.php
 php -l public/set-delete.php
 php -l src/bootstrap.php
@@ -202,8 +196,25 @@ Manual checks completed:
 - Destructive buttons are visually distinct.
 - Keyboard navigation displays a visible focus outline.
 
-Sorting multiple workouts, including workouts with the same date, and additional field-length boundary checks remain to
-be tested.
+### Final verification (2026-10-05)
+
+The core features of the first local version are implemented. Earlier manual checks confirmed the complete workflow
+for workouts, exercise entries, and sets, including editing, deletion, redirects, and mobile table scrolling.
+
+Final checks passed:
+
+- Syntax checks for PHP source, pages, templates, and the example configuration.
+- 52 validation and HTML-escaping checks, including Unicode field-length limits, calendar dates, repetitions, and weights.
+- 100 HTTP and database-structure checks using a temporary application copy with read-only MySQL connections.
+- 8 browser layout checks at viewport widths of 390 and 1280 px on the home page, catalog, and creation forms.
+- Inspection of the live MySQL 8.4.11 schema confirmed the expected InnoDB tables, collation, CHECK constraints, unique
+  indexes, and foreign-key deletion rules.
+- The local configuration is ignored by Git and does not appear in the accessible repository history.
+
+The read-only checks did not repeat successful database writes. Cascade deletion, rollback after an injected failure,
+concurrent requests, the maximum set number, and sorting several workouts with the same date remain untested in a
+separate database. Populated workout tables rely on the earlier manual verification. These limits are recorded rather
+than treated as passed tests.
 
 Database schema rules and the scope of their verification are documented in `docs/database-design.md`.
 

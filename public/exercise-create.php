@@ -48,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $pageTitle = 'GymLog New Exercise';
 require __DIR__ . '/../templates/header.php';
 ?>
+        <h1>Create exercise</h1>
         <?php
         if ($errorMessage !== null): ?>
             <p><?= e($errorMessage) ?></p>

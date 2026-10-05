@@ -74,6 +74,7 @@ if ($errorMessage === null) {
 $pageTitle = 'GymLog Edit Workout';
 require __DIR__ . '/../templates/header.php';
 ?>
+        <h1>Edit workout</h1>
         <?php
         if ($errorMessage !== null): ?>
             <p><?= e($errorMessage) ?></p>
